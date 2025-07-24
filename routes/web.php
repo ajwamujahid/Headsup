@@ -1,8 +1,11 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
-
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SaleAppointmentController;
+
+Route::post('/sales/person-checkout/{id}', [UserController::class, 'personCheckout'])->name('salesperson.checkout');
+
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -103,36 +106,50 @@ Route::get('/sales/current-turn', [SalesPersonController::class, 'currentTurn'])
 
 use App\Http\Controllers\CustomerController;
 
+
+    // Route::get('/salesperson/customer/add', [CustomerController::class, 'create'])->name('salesperson.customer.add');
 Route::get('/customers', [CustomerController::class, 'index'])->name('customer.index');
 Route::get('/customers/add', [CustomerController::class, 'create'])->name('customer.add');
 
 Route::post('/customers/store', [CustomerController::class, 'store'])->name('customers.store');
-use App\Http\Controllers\SalesAppointmentController;
+// uuse App\Http\Controllers\SalesAppointmentController;
 
-// Route Group for Salesperson (optional middleware: auth, role, etc.)
 Route::prefix('salesperson')->name('salesperson.')->group(function () {
 
-    // Appointment creation form (index with salespersons)
     Route::get('/appointments/create', [SalesAppointmentController::class, 'index'])->name('appointments.create');
-
-    // Store new appointment
     Route::post('/appointments', [SalesAppointmentController::class, 'store'])->name('appointments.store');
-
-    // View appointment list (all for this salesperson)
     Route::get('/appointments', [SalesAppointmentController::class, 'showList'])->name('appointments.index');
-
-    // View single completed appointment
     Route::get('/appointments/{id}', [SalesAppointmentController::class, 'show'])->name('appointments.show');
-
-    // Arrival form (when customer arrives)
     Route::get('/appointments/{id}/arrival', [SalesAppointmentController::class, 'showArrivalForm'])->name('appointments.arrival');
-
-    // Edit form for appointment
     Route::get('/appointments/{id}/edit', [SalesAppointmentController::class, 'edit'])->name('appointments.edit');
-
-    // Update appointment details
     Route::put('/appointments/{id}', [SalesAppointmentController::class, 'update'])->name('appointments.update');
 
+});
+use App\Http\Controllers\AppointmentController;
+
+Route::prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
+    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/{id}', [AppointmentController::class, 'show'])->name('appointments.show');
+    Route::get('/appointments/{id}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
+    Route::put('/appointments/{id}', [AppointmentController::class, 'update'])->name('appointments.update');
+    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
+
+});
+use App\Http\Controllers\SalesAppointmentController;
+Route::post('/salesperson/appointments', [SalesAppointmentController::class, 'store'])
+    ->name('salesperson.appointments.store');
+Route::prefix('salesperson')->group(function () {
+    
+    Route::get('/appointments', [SalesAppointmentController::class, 'showList'])->name('salesperson.appointments.index');
+    Route::get('/appointments/create', [SalesAppointmentController::class, 'index'])->name('salesperson.appointments.create');
+    Route::post('/appointments', [SalesAppointmentController::class, 'store'])->name('salesperson.appointments.store');
+    Route::get('/appointments/{id}/edit', [SalesAppointmentController::class, 'edit'])->name('salesperson.appointments.edit');
+    Route::put('/appointments/{id}', [SalesAppointmentController::class, 'update'])->name('salesperson.appointments.update');
+    Route::get('/appointments/{id}', [SalesAppointmentController::class, 'show'])->name('salesperson.appointments.show');
+    Route::get('/appointments/{id}/arrived', [SalesAppointmentController::class, 'showArrivalForm'])->name('salesperson.appointments.arrived');
 });
 
 use App\Http\Controllers\SalesCustomerController;
@@ -154,3 +171,6 @@ Route::post('/customers/{id}/assign', [CustomerController::class, 'assign'])->na
 use App\Http\Controllers\CustomerActivityController;
 
 Route::get('/activity', [CustomerActivityController::class, 'index'])->name('customer.customer-activity');
+use App\Http\Controllers\QueueController;
+
+Route::get('/queues', [QueueController::class, 'index'])->name('queues.index');

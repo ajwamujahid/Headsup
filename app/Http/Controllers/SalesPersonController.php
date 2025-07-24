@@ -82,6 +82,7 @@ public function dashboard()
 
     $salesperson = SalesProfile::find($salespersonId);
     $salespeople = SalesProfile::where('role', 'Sales Person')->get();
+    $allSalespeople = SalesProfile::with('customers')->get();
 
     $customers = Customer::with('salesperson')
         ->where(function ($query) use ($salespersonId) {
@@ -115,6 +116,8 @@ public function dashboard()
         'customers',
         'checkedIn',
         'isMyTurn',
+        'allSalespeople',
+        
         'checkin'  // <-- Add this line
     ));
 }

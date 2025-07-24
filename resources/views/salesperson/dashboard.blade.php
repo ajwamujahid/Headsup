@@ -20,34 +20,22 @@
     font-size: 15px;
 }
 .customer-card {
-    transition: opacity 0.4s ease;
+  transition: all 0.3s ease;
 }
 
-  .active-card {
-    animation: pulseActive 1s infinite;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
-  }
+.customer-card:hover {
+  animation: pulseActive 1s infinite;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+}
 
-  @keyframes pulseActive {
-    0% {
-      box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
-    }
-    70% {
-      box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
-    }
-  }
-
-  .pause-animation {
-    animation: none !important;
-    box-shadow: none !important;
-  }
-
+@keyframes pulseActive {
+  0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+}
 </style>
-@endpush
+
 
    @section('content')
      <!-- Page Content -->
@@ -199,12 +187,23 @@
       <!-- Modal Trigger -->
       <div class="md:col-span-2 text-right mt-4">
        <button id="openModalBtn"  type="button" class="bg-gray-800 text-white px-3 py-1.5 rounded"> Close </button>
-<button type="button" id="toBtn"  class=" relative bg-gray-800 text-white px-4 py-1.5 rounded">
-  <span class="btn-label">T/O</span>
-  <div class="toSpinner hidden absolute inset-0 bg-black/50 flex items-center justify-center z-10 rounded">
-    <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-  </div>
-</button>
+       @foreach($allSalespeople as $salesperson)
+       @foreach($salesperson->customers as $customer)
+           <button type="button" 
+               class="toBtn bg-gray-800 text-white px-4 py-1.5 rounded relative" 
+               data-salesperson="{{ $salesperson->name }}" 
+               data-customer="{{ $customer->name }}" 
+               data-time="{{ now()->format('h:i A') }}" 
+               data-salesperson-id="{{ $salesperson->id }}">
+             <span class="btn-label">T/O</span>
+             <div class="toSpinner hidden absolute inset-0 bg-black/50 flex items-center justify-center z-10 rounded">
+               <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+             </div>
+           </button>
+       @endforeach
+   @endforeach
+   
+
       </div>
     </form>
   </div>
@@ -252,16 +251,12 @@ Checked Out
 
 
     <div>
-      {{-- <button id="takeCustomerBtn" class="btn btn-primary" type="button" data-checked-in="false" class="w-full bg-gray-800 text-white font-semibold px-6 py-2 rounded mb-4 flex items-center justify-center gap-2">
-      <span class="spinner hidden w-5 h-5 border-2 border-white border-t-transparent rounded animate-spin"></span>
-      <span class="btn-text">Take Customer</span>
-    </button>
-     --}}
+      
      <input type="hidden" id="currentUserId" value="{{ session('sales_id') }}">
-     <button id="takeCustomerBtn"  type="button" data-checked-in="false" class="w-full bg-gray-800 text-white font-semibold px-6 py-2  rounded mb-4 flex  gap-2" data-checked-in="{{ $checkedIn ? 'true' : 'false' }}">
+     <button id="takeCustomerBtn"  type="button" data-checked-in="false" class="w-full bg-gray-800 text-white font-semibold px-6 py-2  rounded mb-4 flex   gap-2" style="text-align: center;" data-checked-in="{{ $checkedIn ? 'true' : 'false' }}">
     
       <span id="turn-status" class="text-sm text-gray-500"></span>
-      <span class="btn-text" class= "w-full bg-gray-800 text-white font-semibold px-6 py-2  rounded mb-4 flex items-center justify-center gap-2">Take Customer</span>
+      <span class="btn-text" class= "w-full bg-gray-800 text-white  px-6 py-2  rounded mb-4  flex items-center justify-center gap-2" style="margin-left: 25px; ">Take Customer</span>
   </button>
   
   
@@ -270,24 +265,24 @@ Checked Out
   </div>
   <!-- Scrollable Customers -->
   <div class="flex-1 overflow-y-auto pr-2 max-h-[80vh]" id="customerCards">
-    <style>
-.active-card {
-  animation: pulseActive 1s infinite;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
-}
-
-/* Pause class */
-.active-card.paused {
-  animation-play-state: paused !important;
-}
-
-
-</style>
+    @php
+    $lastCustomer = $customers->filter(fn($c) => $c->salesperson_id == session('sales_id'))->last();
+    @endphp
 
 <div id="customer-list">
   @foreach ($customers as $c)
-  <div class="customer-card bg-white border rounded-lg p-4 shadow-sm space-y-1 mt-3 {{ $c->salesperson_id == session('sales_id') ? 'active-card' : '' }}">
+  <div class="customer-card bg-white border rounded-lg p-4 shadow-sm space-y-1 mt-3
+  {{ $c->salesperson_id == session('sales_id') ? 'cursor-pointer' : 'opacity-50 pointer-events-none' }}
+  {{ $lastCustomer && $c->id === $lastCustomer->id ? 'last-active' : '' }}"
+  
+  data-name="{{ $c->name }}"
+  data-email="{{ $c->email }}"
+  data-phone="{{ $c->phone }}"
+  data-interest="{{ $c->interest }}"
+  data-notes="{{ $c->notes }}"
+  data-process='@json(json_decode($c->process))'
+  data-disposition="{{ $c->disposition }}"
+>
 
       <h3 class="font-semibold text-indigo-600 text-sm uppercase tracking-wide">Customer Info</h3>
       <p class="text-sm bg-indigo-100 text-gray-700"><strong>Sales Person:</strong> {{ $c->salesperson->name ?? 'N/A' }}</p>
@@ -311,8 +306,11 @@ Checked Out
 </div>
 
 </div>
-  <div id="appointment-wrapper">
+<div id="appointment-wrapper">
+  
   </div>
+</div>
+
   </div>
   </div>
   </div>
@@ -329,6 +327,7 @@ Checked Out
 @endsection
 @push('scripts')
 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/intlTelInput.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"></script>
 <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
@@ -337,6 +336,36 @@ Checked Out
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pusher-js@7.2.0/dist/web/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/laravel-echo/dist/echo.iife.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const toBtns = document.querySelectorAll('.toBtn');
+      const checkinInfo = document.getElementById('checkin-info');
+
+      toBtns.forEach(btn => {
+          btn.addEventListener('click', function () {
+              const salesperson = this.dataset.salesperson;
+              const customer = this.dataset.customer;
+              const time = this.dataset.time;
+              const salespersonId = this.dataset.salespersonId;
+
+              // Fill right-side Check-In panel
+              document.getElementById('checkin-salesperson').textContent = salesperson;
+              document.getElementById('checkin-customer').textContent = customer;
+              document.getElementById('checkin-time').textContent = time;
+              checkinInfo.classList.remove('hidden');
+
+              // Hide all forms
+              document.querySelectorAll('.sales-form').forEach(form => form.classList.add('hidden'));
+
+              // Show the matching form
+              const currentForm = document.querySelector(`.sales-form[data-salesperson-id="${salespersonId}"]`);
+              if (currentForm) {
+                  currentForm.classList.remove('hidden');
+              }
+          });
+      });
+  });
+</script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -1075,6 +1104,59 @@ Swal.fire({
 });
 
 
+    });
+  });
+</script>
+<script>
+  document.querySelectorAll('.customer-card').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      const name = card.dataset.name;
+      const email = card.dataset.email;
+      const phone = card.dataset.phone;
+      const interest = card.dataset.interest;
+      const notes = card.dataset.notes;
+      const disposition = card.dataset.disposition;
+      const process = JSON.parse(card.dataset.process || '[]');
+
+      function fillCustomerForm(card) {
+    const name = card.dataset.name;
+    const email = card.dataset.email;
+    const phone = card.dataset.phone;
+    const interest = card.dataset.interest;
+    const notes = card.dataset.notes;
+    const disposition = card.dataset.disposition;
+    const process = JSON.parse(card.dataset.process || '[]');
+
+    document.getElementById('nameInput').value = name || '';
+    document.getElementById('emailInput').value = email || '';
+    document.getElementById('phone').value = phone || '';
+    document.getElementById('interestInput').value = interest || '';
+    document.querySelector('textarea[name="notes"]').value = notes || '';
+
+    document.querySelectorAll('input[name="process[]"]').forEach(cb => cb.checked = false);
+    process.forEach(p => {
+      const checkbox = document.querySelector(`input[name="process[]"][value="${p}"]`);
+      if (checkbox) checkbox.checked = true;
+    });
+
+    if (disposition) {
+      const radio = document.querySelector(`input[name="disposition"][value="${disposition}"]`);
+      if (radio) radio.checked = true;
+    }
+  }
+
+  // Add hover events to all cards
+  document.querySelectorAll('.customer-card').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      fillCustomerForm(card);
+    });
+  });
+
+  // 👉 Auto-select last active customer on load
+  const lastActiveCard = document.querySelector('.customer-card.last-active');
+  if (lastActiveCard) {
+    fillCustomerForm(lastActiveCard);
+  }
     });
   });
 </script>
