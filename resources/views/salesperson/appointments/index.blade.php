@@ -5,7 +5,8 @@
 $title = 'Appointments';
 $subtitle = 'Manage and View all the appointmeents here';
 @endphp
-    
+{{-- <pre>{{ print_r($appointments, true) }}</pre> --}}
+
     <!-- Page Content -->
     <main class="flex-1 overflow-y-auto">
         <div class="py-6">
@@ -13,7 +14,7 @@ $subtitle = 'Manage and View all the appointmeents here';
                 <div class="py-6">
 <div class="container mx-auto space-y-6 py-6 px-4">
 <div class="flex items-center justify-end mb-4 px-6">
-<a href="{{route('appointments.create')}}" class="text-white px-3 bg-gray-800 py-1.5 rounded"
+<a href="{{route('salesperson.appointments.create')}}" class="text-white px-3 bg-gray-800 py-1.5 rounded"
    >
     Add Appointments
 </a>

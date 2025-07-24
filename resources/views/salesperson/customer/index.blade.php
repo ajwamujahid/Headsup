@@ -23,7 +23,7 @@ $subtitle = 'Schedule a new appointment by filling out the form below.';
             
             
             <div class="mb-4 flex items-center px-6" style="display: flex; justify-content: end;">
-                           <a href="{{ route('customer.add') }}" class="bg-gray-800 text-white px-3 py-1.5 rounded">
+                           <a href="{{ route('salesperson.customer.create') }}" class="bg-gray-800 text-white px-3 py-1.5 rounded">
                                Add Customer
                            </a>
                        </div>
@@ -42,7 +42,7 @@ $subtitle = 'Schedule a new appointment by filling out the form below.';
             @endforeach
         </select>
     </div>
-
+    
 
     <!-- From Date -->
     <div style="margin-left:390px; ">

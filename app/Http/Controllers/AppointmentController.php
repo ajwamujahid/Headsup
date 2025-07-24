@@ -1,37 +1,28 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use App\Models\SalesProfile;
 use App\Models\Appointment;
+
 class AppointmentController extends Controller
 {
-    public function index()
-    {
-        $salespersons = SalesProfile::all(); // Assuming your salespeople are stored here
-        return view('appointments.create', compact('salespersons'));
-    }
+    // Show all appointments to Admin / Sales Manager
     public function showList()
     {
         $appointments = Appointment::with('salesperson')->latest()->get();
         return view('appointments.index', compact('appointments'));
     }
-    public function show($id)
+
+    // Show create appointment form
+    public function index()
     {
-        $appointment = \App\Models\Appointment::findOrFail($id);
-    
-        // Check if appointment is completed
-        if ($appointment->status !== 'completed') {
-            $appointments = []; // show nothing if not completed
-        } else {
-            $appointments = [$appointment]; // wrap single appointment in array
-        }
-    
-        return view('appointments.show', compact('appointments'));
+        $salespersons = SalesProfile::all();
+        return view('appointments.create', compact('salespersons'));
     }
-    
+
+    // Store new appointment
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -42,51 +33,63 @@ class AppointmentController extends Controller
             'salesperson_id' => 'nullable|exists:sales_profiles,id',
             'notes' => 'nullable|string',
         ]);
-    
+
         $appointment = Appointment::create($validated);
-    
+
         return response()->json([
             'message' => 'Appointment booked successfully!',
-            'redirect' => route('appointments.create') // or wherever you want to go after
+            'redirect' => route('admin.appointments.index') // redirect to admin index
         ]);
     }
-    // app/Http/Controllers/AppointmentController.php
 
-// app/Http/Controllers/AppointmentController.php
+    // Show single completed appointment
+    public function show($id)
+    {
+        $appointment = Appointment::with('salesperson')->findOrFail($id);
 
-public function showArrivalForm($id)
-{
-    $appointment = \App\Models\Appointment::findOrFail($id);
+        // Only show if completed
+        if ($appointment->status !== 'completed') {
+            abort(403, 'This appointment is not completed yet.');
+        }
 
-    return view('appointments.customer_arrived', compact('appointment'));
+        return view('appointments.show', ['appointments' => [$appointment]]);
+    }
+
+    // Show customer arrival form
+    public function showArrivalForm($id)
+    {
+        $appointment = Appointment::with('salesperson')->findOrFail($id);
+        return view('appointments.customer_arrived', compact('appointment'));
+    }
+
+    // Show appointment edit form
+    public function edit($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+        $salespersons = SalesProfile::all();
+
+        return view('appointments.edit', compact('appointment', 'salespersons'));
+    }
+
+    // Update appointment
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:20',
+            'date' => 'required|date',
+            'time' => 'required',
+            'salesperson_id' => 'required|exists:sales_profiles,id',
+            'status' => 'required|in:scheduled,completed,canceled',
+        ]);
+
+        $appointment = Appointment::findOrFail($id);
+        $appointment->update($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Appointment updated successfully!',
+            'redirect' => route('admin.appointments.index'),
+        ]);
+    }
 }
-public function edit($id)
-{
-    $appointment = Appointment::findOrFail($id);
-    $salespersons = SalesProfile::all(); // optional: only Sales Person role if needed
-
-    return view('appointments.edit', compact('appointment', 'salespersons'));
-}
-
-public function update(Request $request, $id)
-{
-    $validated = $request->validate([
-        'customer_name' => 'required|string|max:255',
-        'customer_phone' => 'required|string|max:20',
-        'date' => 'required|date',
-        'time' => 'required',
-        'salesperson_id' => 'required|exists:sales_profiles,id',
-        'status' => 'required|in:scheduled,completed,canceled',
-    ]);
-
-    $appointment = Appointment::findOrFail($id);
-    $appointment->update($validated);
-
-    return response()->json([
-        'status' => 'success',
-        'message' => 'Appointment updated successfully!',
-        'redirect' => route('appointments.index'),
-    ]);
-}
-
-}    

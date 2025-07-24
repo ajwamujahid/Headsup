@@ -1,4 +1,4 @@
-@extends('layouts.saledashbaord')
+@extends('layouts.saledashboard')
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/css/intlTelInput.css" />
    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -37,7 +37,7 @@ box-shadow: none !important;
 <!-- Page Heading -->
 <div class="max-w-full mx-auto sm:px-6 lg:px-8">
 <div class="bg-white shadow rounded-lg p-6">
-<form id="appointment-form">
+<form id="appointment-form" action="{{ route('salesperson.appointments.store') }}">
    @csrf
     <!-- Section: Customer Information -->
     <h3 class="text-lg font-semibold text-gray-700 mb-4">Customer Information</h3>
@@ -105,54 +105,6 @@ box-shadow: none !important;
 </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-const form = document.getElementById('appointment-form');
-
-form.addEventListener('submit', function (e) {
-e.preventDefault();
-
-const formData = new FormData(form);
-
-fetch('/appointments/create', {
-method: 'POST',
-headers: {
-    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-    'Accept': 'application/json'
-},
-body: formData
-})
-.then(response => {
-if (!response.ok) return response.json().then(err => Promise.reject(err));
-return response.json();
-})
-.then(data => {
-Swal.fire({
-icon: 'success',
-title: `Success!`,
-html: `${data.message}`,
-showConfirmButton: true,
-});
-setTimeout(() => {
-    window.location.href = '/appointments/create';
-}, 2000);
-})
-.catch(error => {
-let errorMsg = "Something went wrong.";
-if (error?.errors) {
-    errorMsg = Object.values(error.errors).flat().join("<br>");
-}
-
-Swal.fire({
-    icon: 'error',
-    title: 'Validation Error',
-    html: errorMsg
-});
-});
-});
-});
-</script>
             </div>
         </div>
     </main>
@@ -174,6 +126,60 @@ Swal.fire({
 @endsection
 <!-- Additional Scripts -->
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('appointment-form');
+    
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+    
+            fetch("{{ route('salesperson.appointments.store') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) return response.json().then(err => Promise.reject(err));
+                return response.json();
+            })
+            .then(data => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    html: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                setTimeout(() => {
+                    window.location.href = data.redirect ?? window.location.href;
+                }, 2000);
+            })
+            .catch(error => {
+                console.error('Request error:', error); // for debugging
+    
+                let errorMsg = "Something went wrong.";
+                if (error?.errors) {
+                    errorMsg = Object.values(error.errors).flat().join("<br>");
+                } else if (error?.error) {
+                    errorMsg = error.error;
+                }
+    
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: errorMsg
+                });
+            });
+        });
+    });
+    </script>
+    
     
 
 <script>

@@ -14,11 +14,10 @@ class Appointment extends Model
         'date',
         'time',
         'salesperson_id',
-        'notes'
+        'notes',
+        'status',
     ];
-    protected $attributes = [
-        'status' => 'scheduled',
-    ];
+   
     
     public function salesperson()
     {

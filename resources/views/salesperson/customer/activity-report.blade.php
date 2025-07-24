@@ -5,10 +5,10 @@
 
     @endpush
 @section('content')
-{{-- @php
+@php
 $title = 'Create User';
 $subtitle = 'Add a new Sale Person to the system.';
-@endphp --}}
+@endphp
                     
                     <!-- Page Content -->
                     <main class="flex-1 overflow-y-auto">
