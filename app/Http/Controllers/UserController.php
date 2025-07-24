@@ -6,14 +6,16 @@ use App\Models\SalesProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-
+use App\Models\SalesCheckin;
+use App\Models\Customer;
 class UserController extends Controller
 {
     public function index()
-    {
-        $salespeople = SalesProfile::all(); // Only from sales_profiles now
-        return view('salesperson.index', compact('salespeople'));
-    }
+{
+    $salespeople = SalesProfile::withCount('customers')->get(); // 👈 Magic here
+    return view('salesperson.index', compact('salespeople'));
+}
+
 
     public function create()
     {
@@ -85,6 +87,37 @@ public function destroy($id)
     return response()->json([
         'message' => 'Salesperson deleted successfully.'
     ]);
+}
+
+
+public function personCheckout($id)
+{
+    // Find active check-in (No checkout time yet)
+    $checkin = SalesCheckin::where('salesperson_id', $id)
+                ->whereNull('check_out_time')
+                ->first();
+
+    if (!$checkin) {
+        return response()->json(['message' => 'This salesperson is already checked out!'], 400);
+    }
+
+    // Count active customers assigned
+    $customerCount = Customer::where('salesperson_id', $id)
+                            ->where('transferred', 0) // Optional: Filter if transferred is false
+                            ->count();
+
+    if ($customerCount > 0) {
+        return response()->json(['message' => 'Cannot checkout! This salesperson still has active customers.'], 400);
+    }
+
+    // Proceed with Checkout
+    $checkin->check_out_time = now();
+
+    // Calculate Duration (in minutes)
+    $checkin->duration = now()->diffInMinutes($checkin->check_in_time);
+    $checkin->save();
+
+    return response()->json(['message' => 'Salesperson checked out successfully!']);
 }
 
 }

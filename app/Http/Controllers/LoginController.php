@@ -20,19 +20,31 @@ class LoginController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
-    
-        // 🔎 Search in sales_profiles
-        $user = \App\Models\SalesProfile::where('email', $request->email)->first();
-    
-        if ($user && \Hash::check($request->password, $user->password)) {
-            // Store session
+
+        // 🔐 First Try Admin Login
+        $admin = Admin::where('email', $request->email)->first();
+        if ($admin && Hash::check($request->password, $admin->password)) {
+            session([
+                'admin_id' => $admin->id,
+                'admin_name' => $admin->name,
+                'admin_email' => $admin->email,
+                'role' => 'Admin',
+            ]);
+
+            return redirect()->route('admin.dashboard');  // 👈 Admin Dashboard Redirect
+        }
+
+        // 🔎 Search in sales_profiles (Sales Manager or Sales Person)
+        $user = SalesProfile::where('email', $request->email)->first();
+
+        if ($user && Hash::check($request->password, $user->password)) {
             session([
                 'sales_id' => $user->id,
                 'sales_name' => $user->name,
                 'sales_email' => $user->email,
                 'role' => $user->role,
             ]);
-    
+
             // 🧭 Redirect by role
             if ($user->role === 'Sales Manager') {
                 return redirect()->route('manager.dashboard');
@@ -42,11 +54,11 @@ class LoginController extends Controller
                 return redirect('/login')->withErrors(['email' => 'Role not recognized.']);
             }
         }
-    
+
         return back()->withErrors(['email' => 'Invalid credentials.']);
     }
-    
-    
+
+   
     public function logout(Request $request)
     {
         $request->session()->flush();

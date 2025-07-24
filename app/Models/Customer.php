@@ -6,15 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 class Customer extends Model
 {
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'interest',
-        'notes',
-        'process',
-        'disposition',
-        'salesperson_id',
-        'assigned_to',
+        'salesperson_id', 'name', 'email', 'phone', 'note', 'assigned_to', 
+        'transferred', 'transferred_to', 'interest', 'notes', 'process', 'disposition'
     ];
     
     public function salesperson()

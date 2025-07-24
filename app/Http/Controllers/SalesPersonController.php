@@ -38,33 +38,21 @@ public function checkout(Request $request)
     if (!$salespersonId) {
         return response()->json(['error' => 'Unauthorized.'], 401);
     }
-    $pendingCustomers = Customer::where('assigned_to', $salespersonId)
-    ->whereNull('transferred_to') // means still not transferred
-    ->exists();
 
-if ($pendingCustomers) {
-    return response()->json([
-        'message' => 'You cannot check out while customers are still assigned to you. Please transfer them first.',
-    ], 403);
-}
-
-    // $assignedCustomers = Customer::where('assigned_to', $salespersonId)
-    // ->where(function ($query) use ($salespersonId) {
-    //     $query->whereNull('transferred_to')
-    //           ->orWhere('transferred_to', '!=', $salespersonId);
-    // })
-    // ->exists();
-
-
-    // if ($assignedCustomers) {
-    //     return response()->json(['error' => '⚠️ You still have assigned customers. Please transfer them before checking out.'], 403);
-    // }
-
+    // ✅ Get current active check-in (with latest pending_customers_count)
     $checkin = SalesCheckin::where('salesperson_id', $salespersonId)
         ->whereNull('check_out_time')
         ->latest()
         ->first();
 
+    // ✅ 🛑 Block Checkout if pending customers exist
+    if ($checkin && $checkin->pending_customers_count > 0) {
+        return response()->json([
+            'error' => '⛔ You cannot check out while customers are still assigned to you. Please transfer them first.'
+        ], 403);
+    }
+
+    // ✅ Proceed with Checkout (Only if no pending customers)
     if ($checkin) {
         $checkin->check_out_time = now();
         $checkin->duration = now()->diffInSeconds($checkin->check_in_time);
@@ -73,7 +61,6 @@ if ($pendingCustomers) {
 
     return response()->json(['message' => '✅ Checked out successfully!']);
 }
-
 
 
 public function assign(Request $request, $id)
@@ -104,32 +91,33 @@ public function dashboard()
         ->latest()
         ->get();
 
-    // Check-in status
+    // ✅ Get current active check-in
     $checkin = SalesCheckin::where('salesperson_id', $salespersonId)
         ->whereNull('check_out_time')
-        ->orderBy('created_at', 'desc')
+        ->latest()
         ->first();
 
     $checkedIn = $checkin !== null;
 
     // Determine if it's their turn
     $firstInLine = SalesCheckin::whereNull('check_out_time')
-    ->orderBy('last_assigned_at')
-    ->orderBy('check_in_time')
-    ->lockForUpdate()
-    ->first();
+        ->orderBy('last_assigned_at')
+        ->orderBy('check_in_time')
+        ->lockForUpdate()
+        ->first();
 
     $isMyTurn = $firstInLine && $firstInLine->salesperson_id == $salespersonId;
 
+    // ✅ Pass $checkin to the view
     return view('salesperson.dashboard', compact(
         'salesperson',
         'salespeople',
         'customers',
         'checkedIn',
-        'isMyTurn'
+        'isMyTurn',
+        'checkin'  // <-- Add this line
     ));
 }
-
 
    
     public function checkIn(Request $request)
@@ -177,16 +165,21 @@ public function dashboard()
     
         if ($checkin) {
             // 🛑 Prevent checkout if any customer still assigned and not transferred
-            $hasPendingCustomer = Customer::where('assigned_to', $currentSalespersonId)
-                ->whereNull('transferred_to')
-                ->exists();
-    
-            if ($hasPendingCustomer) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => '⛔ You cannot check out while customers are still assigned to you. Please transfer them first.'
-                ], 403);
-            }
+            $pendingCustomers = Customer::where('assigned_to', $currentSalespersonId)
+            ->where(function($query) {
+                $query->where('transferred', false)
+                      ->orWhereNull('transferred');
+            })
+            ->get();
+        
+        if ($pendingCustomers->count() > 0) {
+            Log::info('🚨 Checkout Blocked - Pending Customers:', $pendingCustomers->pluck('id')->toArray());
+            return response()->json([
+                'status' => 'error',
+                'message' => '⛔ You cannot check out while customers are still assigned to you. Please transfer them first.'
+            ], 403);
+        }
+        
     
             // ✅ Proceed to checkout
             $checkin->check_out_time = Carbon::now();
@@ -348,7 +341,10 @@ public function dashboard()
         $checkin->update([
             'last_assigned_at' => now(),
         ]);
-    
+        
+        // ✅ Increase pending customers count for current salesperson
+        $checkin->increment('pending_customers_count');
+        
         $next = SalesCheckin::whereNull('check_out_time')
             ->orderBy('last_assigned_at')
             ->orderBy('check_in_time')
@@ -457,13 +453,37 @@ private function getFirstInLine()
         $newSalesperson = SalesProfile::find($request->new_salesperson_id);
     
         if ($customer && $newSalesperson) {
+            // Decrement pending_customers_count from old salesperson
+            $currentCheckin = SalesCheckin::where('salesperson_id', $customer->salesperson_id)
+                ->whereNull('check_out_time')
+                ->latest()
+                ->first();
+    
+            if ($currentCheckin && $currentCheckin->pending_customers_count > 0) {
+                $currentCheckin->decrement('pending_customers_count');
+            }
+    
+            // Transfer the customer to new salesperson
             $customer->salesperson_id = $newSalesperson->id;
             $customer->assigned_to = $newSalesperson->id;
             $customer->transferred = 1;
             $customer->transferred_to = $newSalesperson->id;
             $customer->save();
     
-            event(new CustomerTransferred($customer)); // 🔥 Send realtime event
+            // Increment pending_customers_count & transferred_customers for new salesperson
+            $newCheckin = SalesCheckin::where('salesperson_id', $newSalesperson->id)
+                ->whereNull('check_out_time')
+                ->latest()
+                ->first();
+    
+            if ($newCheckin) {
+                $newCheckin->increment('pending_customers_count');
+                $newCheckin->increment('transferred_customers'); // <-- Add this increment
+                $newCheckin->update(['last_assigned_at' => now()]); // <-- Turn rotation
+            }
+    
+            // Fire real-time event
+            event(new CustomerTransferred($customer));
     
             return response()->json([
                 'success' => true,

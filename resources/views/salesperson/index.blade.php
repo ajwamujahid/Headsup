@@ -28,7 +28,8 @@ $subtitle = 'View and manage all active sales team members below.';
                         <tr class="border-t">
                             <td class="border-b px-4 py-3">{{ $user->name }}</td>
                             <td class="border-b px-4 py-3">{{ $user->email }}</td>
-                            <td class="border-b px-4 py-3">{{ 0}}</td>
+                            <td class="border-b px-4 py-3">{{ $user->customers_count }}</td>
+
                             <td class="border-b px-4 py-3">{{ ucfirst($user->role) }}</td>
                             <td class="border-b px-4 py-3">
                                 <div class="flex gap-2">

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;   
-use App\Models\CustomerSale;
+use App\Models\Customer;
 use Carbon\Carbon;
 
 class CustomerController extends Controller
@@ -10,26 +10,35 @@ class CustomerController extends Controller
     
     public function index(Request $request)
     {
-        $query = CustomerSale::query();
+        $query = Customer::query();
     
+        // 🔍 Search Filter
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . trim($request->search) . '%');
         }
     
+        // 📅 Date Filter
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $from = Carbon::parse($request->from_date)->startOfDay();
             $to = Carbon::parse($request->to_date)->endOfDay();
             $query->whereBetween('created_at', [$from, $to]);
         }
     
-        $customers = $query->latest()->paginate(10);
-        if ($customers->isEmpty()) {
-            // Flash message for SweetAlert
-            session()->flash('no_data_found', 'No customer records found.');
-        }    
-        $allCustomers = CustomerSale::select('name')->distinct()->get();
+        // 👤 Filter by Salesperson (assigned_to)
+        if ($request->filled('salesperson_id')) {
+            $query->where('assigned_to', $request->salesperson_id);
+        }
     
-        return view('customer.index', compact('customers', 'allCustomers'));
+        $customers = $query->latest()->paginate(10);
+    
+        if ($customers->isEmpty()) {
+            session()->flash('no_data_found', 'No customer records found.');
+        }
+    
+        // For Salesperson Dropdown
+        $salespeople = \App\Models\SalesProfile::select('id', 'name')->get();
+    
+        return view('customer.index', compact('customers', 'salespeople'));
     }
     
     public function create()

@@ -184,17 +184,18 @@ $subtitle = 'Add a new Sale Person to the system.';
             const result = await response.json();
 
             if (response.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'User Created!',
-                    text: result.message || 'The user was successfully created.',
-                    confirmButtonText: 'OK',
-                    customClass: { confirmButton: 'custom-ok-btn' },
-                    buttonsStyling: false
-                }).then(() => {
-                    window.location.href = `https://headsup.trevinosauto.com/saleperson`;
-                });
-            } else {
+    Swal.fire({
+        icon: 'success',
+        title: 'User Created!',
+        text: result.message || 'The user was successfully created.',
+        confirmButtonText: 'OK',
+        customClass: { confirmButton: 'custom-ok-btn' },
+        buttonsStyling: false
+    }).then(() => {
+        window.location.href = `http://127.0.0.1:8000/salesperson`; // 👈 Local URL here
+    });
+}
+else {
                 let msg = result.message || 'Something went wrong.';
                 if (result.errors) {
                     msg = Object.values(result.errors).flat().join('\n');

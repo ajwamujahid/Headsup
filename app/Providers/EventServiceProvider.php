@@ -12,6 +12,9 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\SalesCheckedIn::class => [
             \App\Listeners\AssignTurnListener::class,
         ],
+        \App\Events\CustomerTransferred::class => [
+            \App\Listeners\UpdateCheckinTransferredCount::class,
+        ],
     ];
     
   

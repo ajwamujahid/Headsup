@@ -54,7 +54,12 @@
      {{-- <p style="color:red">Your ID: {{ session('sales_id') }}</p>
      <p id="isMyTurnText" style="color:blue">Is It Your Turn? <span id="isMyTurnValue">{{ $isMyTurn ? 'true' : 'false' }}</span></p> --}}
 
-     
+     {{-- @if ($checkin && $checkin->pending_customers_count > 0)
+    <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
+        ⚠️ You have {{ $checkin->pending_customers_count }} pending customers. Please transfer them before checkout.
+    </div>
+@endif --}}
+
 
                     <main class="flex-1 overflow-y-auto">
                         <div class="py-6">
@@ -551,6 +556,9 @@ window.salespersons = @json($salesperson); // comes from controller
 </script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  let pendingCustomersCount = {{ $checkin->pending_customers_count ?? 0 }};
+</script>
 
 <script>
   const salespeopleOptions = @json($salespeople->pluck('name', 'id'));
@@ -635,6 +643,15 @@ window.salespersons = @json($salesperson); // comes from controller
   
       checkForm?.addEventListener("submit", function (e) {
     e.preventDefault();
+    // 🚨 NEW ADDITION: Check pending customers before sending request
+    if (pendingCustomersCount > 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Pending Customers!',
+            text: `⚠️ You have ${pendingCustomersCount} pending customers. Please transfer them before checkout.`
+        });
+        return; // 🛑 STOP HERE, don't send API call!
+    }
     checkSpinner?.classList.remove("hidden");
     checkBtn?.classList.add("hidden");
 
