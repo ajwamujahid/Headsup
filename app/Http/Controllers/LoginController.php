@@ -64,4 +64,61 @@ class LoginController extends Controller
         $request->session()->flush();
         return redirect('/login');
     }
+
+    protected function authenticated(Request $request, $user)
+    {
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard'); // Make sure this route exists
+        } elseif ($user->role === 'sales_manager') {
+            return redirect()->route('manager.dashboard');
+        } elseif ($user->role === 'sales_person') {
+            return redirect()->route('salesperson.dashboard');
+        } else {
+            return redirect('/home');
+        }
+    }
+    
+    // public function logout(Request $request)
+    // {
+    //     Auth::logout();
+    //     $request->session()->invalidate();
+    //     $request->session()->regenerateToken();
+
+    //     return redirect('/login');
+    // }
+   
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+        ]);
+    
+        $user = Auth::user();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->save();
+    
+        return back()->with('status', 'Profile updated successfully!');
+    }
+    
+public function updatePassword(Request $request)
+{
+    $request->validate([
+        'current_password' => ['required'],
+        'password' => ['required', 'string', 'min:8', 'confirmed'],
+    ]);
+
+    $user = Auth::user();
+
+    if (!Hash::check($request->current_password, $user->password)) {
+        return back()->withErrors(['current_password' => 'Current password does not match.']);
+    }
+
+    $user->password = Hash::make($request->password);
+    $user->save();
+
+    return back()->with('status', 'Password updated successfully!');
+}
+
 }

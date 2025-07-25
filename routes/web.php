@@ -3,8 +3,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SaleAppointmentController;
-
+use App\Http\Controllers\AppointmentController;
 Route::post('/sales/person-checkout/{id}', [UserController::class, 'personCheckout'])->name('salesperson.checkout');
+Route::post('/queues/takeover', [App\Http\Controllers\QueueController::class, 'takeover']);
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
@@ -49,6 +50,7 @@ Route::put('/appointments/{id}', [AppointmentController::class, 'update'])->name
 
 // Handle the Form Submission
 Route::post('/create/saleperson', [UserController::class, 'store'])->name('saleperson.store');
+Route::get('/salesperson/activity-report', [UserController::class, 'activityReport'])->name('sales.activity.report');
 
 
 Route::get('/salesperson', [UserController::class, 'index'])->name('salesperson.index');
@@ -125,19 +127,7 @@ Route::prefix('salesperson')->name('salesperson.')->group(function () {
     Route::put('/appointments/{id}', [SalesAppointmentController::class, 'update'])->name('appointments.update');
 
 });
-use App\Http\Controllers\AppointmentController;
 
-Route::prefix('admin')->name('admin.')->group(function () {
-
-    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
-    Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
-    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
-    Route::get('/appointments/{id}', [AppointmentController::class, 'show'])->name('appointments.show');
-    Route::get('/appointments/{id}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
-    Route::put('/appointments/{id}', [AppointmentController::class, 'update'])->name('appointments.update');
-    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
-
-});
 use App\Http\Controllers\SalesAppointmentController;
 Route::post('/salesperson/appointments', [SalesAppointmentController::class, 'store'])
     ->name('salesperson.appointments.store');
@@ -174,3 +164,4 @@ Route::get('/activity', [CustomerActivityController::class, 'index'])->name('cus
 use App\Http\Controllers\QueueController;
 
 Route::get('/queues', [QueueController::class, 'index'])->name('queues.index');
+Route::post('/highlight-customer', [QueueController::class, 'highlightCustomer'])->name('highlight.customer');

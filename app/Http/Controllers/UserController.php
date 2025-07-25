@@ -11,17 +11,59 @@ use App\Models\Customer;
 class UserController extends Controller
 {
     public function index()
-{
-    $salespeople = SalesProfile::withCount('customers')->get(); // 👈 Magic here
-    return view('salesperson.index', compact('salespeople'));
-}
-
-
+    {
+        $salespeople = SalesProfile::withCount('customers')
+                        ->with(['activeCheckin']) // eager load activeCheckin
+                        ->get();
+    
+        return view('salesperson.index', compact('salespeople'));
+    }
+    
     public function create()
     {
         return view('salesperson.create');
     }
-
+    public function activityReport(Request $request)
+    {
+        $userId = $request->query('user_id');
+        $salesperson = SalesProfile::findOrFail($userId);
+    
+        // Optional: Date filtering
+        $query = SalesCheckin::where('salesperson_id', $userId);
+    
+        if ($request->filled('from') && $request->filled('to')) {
+            $query->whereBetween('check_in_time', [
+                $request->input('from') . ' 00:00:00',
+                $request->input('to') . ' 23:59:59',
+            ]);
+        }
+    
+        $activities = $query->orderByDesc('check_in_time')->get();
+    
+        $totalCheckIns = $activities->count();
+        $totalCheckOuts = $activities->whereNotNull('check_out_time')->count();
+    
+        $totalMinutes = 0;
+        foreach ($activities as $activity) {
+            if ($activity->check_in_time && $activity->check_out_time) {
+                $totalMinutes += \Carbon\Carbon::parse($activity->check_in_time)
+                    ->diffInMinutes(\Carbon\Carbon::parse($activity->check_out_time));
+            }
+        }
+    
+        $hours = floor($totalMinutes / 60);
+        $minutes = $totalMinutes % 60;
+    
+        return view('salesperson.activity-report', compact(
+            'salesperson',
+            'activities',
+            'totalCheckIns',
+            'totalCheckOuts',
+            'hours',
+            'minutes'
+        ));
+    }
+    
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

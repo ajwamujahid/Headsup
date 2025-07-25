@@ -9,6 +9,9 @@ class Customer extends Model
         'salesperson_id', 'name', 'email', 'phone', 'note', 'assigned_to', 
         'transferred', 'transferred_to', 'interest', 'notes', 'process', 'disposition'
     ];
+    protected $casts = [
+        'process' => 'array',
+    ];
     
     public function salesperson()
     {

@@ -187,22 +187,17 @@
       <!-- Modal Trigger -->
       <div class="md:col-span-2 text-right mt-4">
        <button id="openModalBtn"  type="button" class="bg-gray-800 text-white px-3 py-1.5 rounded"> Close </button>
-       @foreach($allSalespeople as $salesperson)
-       @foreach($salesperson->customers as $customer)
-           <button type="button" 
-               class="toBtn bg-gray-800 text-white px-4 py-1.5 rounded relative" 
-               data-salesperson="{{ $salesperson->name }}" 
-               data-customer="{{ $customer->name }}" 
-               data-time="{{ now()->format('h:i A') }}" 
-               data-salesperson-id="{{ $salesperson->id }}">
-             <span class="btn-label">T/O</span>
-             <div class="toSpinner hidden absolute inset-0 bg-black/50 flex items-center justify-center z-10 rounded">
-               <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-             </div>
-           </button>
-       @endforeach
-   @endforeach
-   
+<!-- Hidden Input to Hold Customer ID -->
+@foreach ($customers as $customer)
+<input type="hidden" id="currentCustomerId" value="{{ $customer->id }}">
+@endforeach
+<!-- T/O Button -->
+<button id="toBtn" type="button"
+    class="bg-gray-800 text-white px-4 py-1.5 rounded">
+    T/O
+</button>
+
+
 
       </div>
     </form>
@@ -280,7 +275,8 @@ Checked Out
   data-phone="{{ $c->phone }}"
   data-interest="{{ $c->interest }}"
   data-notes="{{ $c->notes }}"
-  data-process='@json(json_decode($c->process))'
+  data-process='@json($c->process)'
+
   data-disposition="{{ $c->disposition }}"
 >
 
@@ -289,7 +285,10 @@ Checked Out
       <p class="text-sm text-gray-700"><strong>Name:</strong> {{ $c->name ?? '-' }}</p>
       <p class="text-sm text-gray-700"><strong>Email:</strong> {{ $c->email ?? '-' }}</p>
       <p class="text-sm text-gray-700"><strong>Phone:</strong> {{ $c->phone ?? '-' }}</p>
-      <p class="text-sm text-gray-700"><strong>Process:</strong> {{ is_array(json_decode($c->process)) ? implode(', ', json_decode($c->process)) : 'N/A' }}</p>
+      <p class="text-sm text-gray-700"><strong>Process:</strong> 
+        {{ is_array($c->process) ? implode(', ', $c->process) : (is_string($c->process) ? implode(', ', json_decode($c->process, true)) : 'N/A') }}
+      </p>
+      
       <p class="text-sm text-gray-700"><strong>Disposition:</strong> {{ $c->disposition ?? 'N/A' }}</p>
       <div class="pt-2">
         <button 
@@ -326,7 +325,35 @@ Checked Out
         </div>
 @endsection
 @push('scripts')
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('toBtn').addEventListener('click', function() {
+          const customerId = document.getElementById('currentCustomerId').value;
 
+          if (customerId) {
+              localStorage.setItem('highlightCustomerTrigger', JSON.stringify({ customerId }));
+             // alert('Customer Highlight Triggered to Queue Page!');
+          } else {
+              alert('No Customer ID Found!');
+          }
+      });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.toBtn').forEach(button => {
+          button.addEventListener('click', function () {
+              const customerId = this.dataset.customerId;
+  
+              // Trigger LocalStorage event
+              localStorage.setItem('highlightCustomerTrigger', JSON.stringify({
+                  customerId: customerId,
+                  timestamp: new Date().getTime() // To force storage event to fire every time
+              }));
+          });
+      });
+    });
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/intlTelInput.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"></script>
@@ -336,6 +363,44 @@ Checked Out
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pusher-js@7.2.0/dist/web/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/laravel-echo/dist/echo.iife.js"></script>
+<script>
+  document.querySelectorAll('.toBtn').forEach(button => {
+      button.addEventListener('click', function () {
+          const customer = {
+              id: this.dataset.id,
+              name: this.dataset.name,
+              salesperson: this.dataset.salesperson,
+              process: this.dataset.process,
+          };
+  
+          // Start loading spinner
+          this.querySelector('.toSpinner').classList.remove('hidden');
+  
+          // Send data to backend via POST
+          fetch('/queues/takeover', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRF-TOKEN': '{{ csrf_token() }}'
+              },
+              body: JSON.stringify(customer)
+          })
+          .then(response => response.json())
+          .then(data => {
+              // Remove spinner
+              this.querySelector('.toSpinner').classList.add('hidden');
+  
+              // Redirect or show success (optional)
+              window.location.href = '/queues'; // reload with highlighted
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              this.querySelector('.toSpinner').classList.add('hidden');
+          });
+      });
+  });
+  </script>
+  
 <script>
   document.addEventListener('DOMContentLoaded', function () {
       const toBtns = document.querySelectorAll('.toBtn');

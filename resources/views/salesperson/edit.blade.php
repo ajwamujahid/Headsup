@@ -1,5 +1,9 @@
 @extends('layouts.saledashboard')
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/css/intlTelInput.css" />
+   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
+    @endpush
 @section('content')
  <!-- Page Content -->
  <main class="flex-1 overflow-y-auto">
@@ -76,8 +80,10 @@ border-radius: var(--swal2-border-radius);
     </svg>
 </span>
 <input type="text" name="name" id="name"
-       class="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
-       placeholder="Enter name" required value="admin" />
+    value="{{ old('name', $salesperson->name) }}"
+    class="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
+    placeholder="Enter name" required />
+
 </div>
 </div>
 
@@ -93,8 +99,10 @@ border-radius: var(--swal2-border-radius);
     </svg>
 </span>
 <input type="email" name="email" id="email"
-       class="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
-       placeholder="Enter email" required  value="admin@gmail.com" />
+    value="{{ old('email', $salesperson->email) }}"
+    class="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
+    placeholder="Enter email" required />
+
 </div>
 </div>
 
@@ -146,31 +154,24 @@ viewBox="0 0 24 24">
 </svg>
 </span>
 <select name="role" id="role" required
-class="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
-<option value="Sales Manager" selected>Sales Manager</option>
-<option value="Sales Person" >Sales Person</option>
+    class="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+    <option value="Sales Manager" {{ $salesperson->role === 'Sales Manager' ? 'selected' : '' }}>
+        Sales Manager
+    </option>
+    <option value="Sales Person" {{ $salesperson->role === 'Sales Person' ? 'selected' : '' }}>
+        Sales Person
+    </option>
 </select>
+
 
 </div>
 </div>
 
 
 <!-- Phone Number -->
-<div class="relative">
-<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-<div class="relative">
-<span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5"
-viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round"
-  d="M3 5a2 2 0 012-2h3l2 3h6l2-3h3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"/>
-</svg>
-</span>
-<input type="text" name="phone" id="phone"
-value=""
-class="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
-placeholder="Enter phone number"/>
-</div>
+<div class="" >
+<label for="phone"  class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+<input id="phone"  style="width:510px;" name="phone" type="tel" placeholder=""  class="pl-20 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200" value="{{ old('phone', $salesperson->phone) }}" required style="width: 365px;" class="mt-1 block  rounded-md border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
 </div>
 
 </div>
@@ -188,6 +189,23 @@ Update
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.querySelector("#phone");
+
+        const iti = window.intlTelInput(input, {
+            initialCountry: "pk",
+            separateDialCode: true,
+            preferredCountries: ['pk', 'us', 'gb'],
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"
+        });
+
+        document.querySelector("#appointment-form").addEventListener("submit", function () {
+            input.value = iti.getNumber(); // This will convert to +923001234567
+        });
+    });
+</script>
 
 <script>
 document.getElementById('updateUserForm').addEventListener('submit', async function (e) {
@@ -379,7 +397,26 @@ msg =Object.values(result.errors).flat().join('\n');
                     });
                 });
             </script>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/intlTelInput.min.js"></script>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"></script>
            
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.querySelector("#phone");
+
+        const iti = window.intlTelInput(input, {
+            initialCountry: "pk",
+            separateDialCode: true,
+            preferredCountries: ['pk', 'us', 'gb'],
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"
+        });
+
+        document.querySelector("#appointment-form").addEventListener("submit", function () {
+            input.value = iti.getNumber(); // This will convert to +923001234567
+        });
+    });
+</script>
+
   
     
       @endpush

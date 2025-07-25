@@ -27,5 +27,11 @@ class SalesProfile extends Model
     {
         return $this->hasMany(Customer::class, 'salesperson_id');
     }
-     
+   // In SalesProfile.php
+public function activeCheckin()
+{
+    return $this->hasOne(SalesCheckin::class, 'salesperson_id')
+                ->whereNull('check_out_time');
+}
+  
 }

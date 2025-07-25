@@ -22,59 +22,58 @@ $subtitle = 'View the list of Customer';
 
             
             
-            <div class="mb-4 flex items-center px-6" style="display: flex; justify-content: end;">
-                           <a href="{{ route('customer.add') }}" class="bg-gray-800 text-white px-3 py-1.5 rounded">
+            <div class="mb-2 flex items-center px-6" style="display: flex; justify-content: end;">
+                           <a href="{{ route('customer.add') }}"  class="bg-gray-800 text-white px-3 py-1.5 rounded">
                                Add Customer
                            </a>
                        </div>
              <div class="flex justify-between items-end space-x-6">
-  <!-- Combined Filter Form -->
-<form method="GET" action="{{ route('customer.index') }}" class="flex flex-wrap items-end gap-4 mb-6">
-    <!-- Search by Name -->
-    <div>
-        <label for="search" class="block text-md font-medium mb-1 text-gray-700">Select Customer Name</label>
-        <select id="search" name="search" class="border border-gray-300 rounded-md px-3 py-2 w-64 h-20 select2">
-            <option value="">-- Select Customer --</option>
-            @foreach($allCustomers as $customer)
-                <option value="{{ $customer->name }}" {{ request('search') == $customer->name ? 'selected' : '' }}>
-                    {{ $customer->name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-
-
-    <!-- From Date -->
-    <div style="margin-left:410px; ">
-        <label for="from" class="block text-sm font-medium text-gray-700">From Date</label>
-        <input
-            type="date"
-            name="from_date"
-            id="from"
-            value="{{ request('from_date') }}"
-            class="mt-1 block w-36 border-gray-300 rounded-md shadow-sm"
-        >
-    </div>
-
-    <!-- To Date -->
-    <div>
-        <label for="to" class="block text-sm font-medium text-gray-700">To Date</label>
-        <input
-            type="date"
-            name="to_date"
-            id="to"
-            value="{{ request('to_date') }}"
-            class="mt-1 block w-36 border-gray-300 rounded-md shadow-sm"
-        >
-    </div>
-
-    <!-- Submit -->
-    <div class="pt-6">
-        <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded">
-            Filter
-        </button>
-    </div>
-</form>
+                <form method="GET" action="{{ route('customer.index') }}" class="flex flex-wrap items-end gap-6 mb-6">
+                    <!-- Customer Name Dropdown -->
+                    <div>
+                        <label for="search" class="block text-md font-medium mb-1 text-gray-700">Select Customer Name</label>
+                        <select id="search" name="search" class="border border-gray-300 rounded-md px-3 py-2 w-64 h-20 select2">
+                            <option value="">-- Select Customer --</option>
+                            @foreach($allCustomers as $customer)
+                                <option value="{{ $customer->name }}" {{ request('search') == $customer->name ? 'selected' : '' }}>
+                                    {{ $customer->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                
+                    <!-- From Date -->
+                    <div style="margin-left: 360px;">
+                        <label for="from" class="block text-sm font-medium text-gray-700">From Date</label>
+                        <input
+                            type="date"
+                            name="from_date"
+                            id="from"
+                            value="{{ request('from_date') }}"
+                            class="mt-1 block w-36 border-gray-300 rounded-md shadow-sm"
+                        >
+                    </div>
+                
+                    <!-- To Date -->
+                    <div>
+                        <label for="to" class="block text-sm font-medium text-gray-700" style="margin-left: 30px;">To Date</label>
+                        <input
+                            type="date"
+                            name="to_date"
+                            id="to"
+                            value="{{ request('to_date') }}"
+                            class="mt-1 block w-36 border-gray-300 rounded-md shadow-sm"
+                        >
+                    </div>
+                
+                    <!-- Filter Button -->
+                    <div class="self-end mt-5">
+                        <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded">
+                            Filter
+                        </button>
+                    </div>
+                </form>
+                
 
 </div>
 
@@ -97,21 +96,29 @@ $subtitle = 'View the list of Customer';
                                 <tr class="hover:bg-gray-50">
                                     <td class="border-b px-4 py-2">{{ $customer->name }}</td>
                                     <td class="border-b px-4 py-2">{{ $customer->created_at->format('d M Y h:i A') }}</td>
-                                    <td class="border-b px-4 py-2">
+                                    <td class="border-b px-4 py-2" >
+                                      <span class="inline-block px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded">
                                         @php
-                                            $process = json_decode($customer->process, true);
-                                        @endphp
+                                        $process = is_array($customer->process) ? $customer->process : json_decode($customer->process, true);
+                                    @endphp
+                                    
                                         @if ($process)
-                                            <ul class="list-disc pl-4 text-sm text-gray-700">
+                                            <ul class="list-disc pl-4 text-sm text-gray-700"  >
                                                 @foreach ($process as $step)
                                                     <li>{{ $step }}</li>
                                                 @endforeach
                                             </ul>
                                         @else
-                                            <span class="text-gray-400">-</span>
+                                            <span class="text-gray-400" >-</span>
                                         @endif
+                                       </span>
                                     </td>
-                                    <td class="border-b px-4 py-2">{{ $customer->disposition ?? '-' }}</td>
+                                   
+                                    <td class="border-b px-4 py-2">
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold bg-gray-800 text-white rounded mr-1 mb-1">
+                                        {{ $customer->disposition ?? '-' }}
+                                        </span>
+                                    </td>
                                     <td class="border-b px-4 py-2">
                                         {{ $customer->created_at->diffForHumans() }}
                                     </td>

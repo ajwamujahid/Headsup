@@ -46,29 +46,32 @@ $subtitle = 'View and manage all active sales team members below.';
     Delete
 </button>
 
+<!-- Show Activity Button for Sales Person -->
+@if($user->role === 'Sales Person')
+<a href="{{ url('/salesperson/activity-report?user_id=' . $user->id) }}"
+   class="text-white font-bold px-3 py-1.5 rounded bg-gray-800">
+    Activity
+</a>
+@endif
 
-                                            @if($user->role === 'Sales Person')
+@if($user->role === 'Sales Person' && $user->activeCheckin)
+<!-- Checkout -->
+<form class="check-out-form" action="{{ url('/sales/person-checkout/' . $user->id) }}" method="POST">
+    @csrf
+    <button type="submit"
+            class="check-out-btn text-white font-bold px-3 py-1.5 rounded bg-gray-800">
+        <span class="btn-text">Check Out</span>
+        <svg class="btn-spinner hidden animate-spin h-4 w-4 text-white"
+             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10"
+                    stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 010 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z" />
+        </svg>
+    </button>
+</form>
+@endif
 
-                                        <!-- Activity -->
-                                        <a href="{{ url('/activity-report?user_id=' . $user->id) }}"
-                                           class="bg-gray-800 text-white font-bold px-3 py-1.5 rounded">Activity</a>
-
-                                        <!-- Checkout -->
-                                        <form class="check-out-form" action="{{ url('/sales/person-checkout/' . $user->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="check-out-btn text-white font-bold px-3 py-1.5 rounded bg-gray-800">
-                                                <span class="btn-text">Check Out</span>
-                                                <svg class="btn-spinner hidden animate-spin h-4 w-4 text-white"
-                                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                            stroke="currentColor" stroke-width="4" />
-                                                    <path class="opacity-75" fill="currentColor"
-                                                          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 010 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z" />
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    @endif
                                 </div>
                             </td>
                         </tr>

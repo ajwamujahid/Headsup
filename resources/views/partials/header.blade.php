@@ -24,8 +24,11 @@
                     <!-- Left side - Header Title -->
                     <div class="flex-1">
                         <h2 class="text-2xl font-bold text-gray-800 mb-1">
-Dashboard
-</h2>
+                            {{ $title }}
+                        </h2>
+                        <p class="text-gray-500 text-sm">
+                            {{ $subtitle }}
+                        </p>
 
                     </div>
 

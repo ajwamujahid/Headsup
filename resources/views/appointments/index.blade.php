@@ -40,16 +40,20 @@ $subtitle = 'Manage and View all the appointmeents here';
                 <td class="px-4 py-2">
                     {{ \Carbon\Carbon::parse($appointment->created_at)->timezone('Asia/Karachi')->format('d M Y h:i A') }}
                 </td>
-                <td class="px-4 py-2">{{ $appointment->status }}</td>
+                <td class="px-4 py-2">
+                    <span class="inline-block px-2 py-1  mr-1 mb-1  font-semibold bg-gray-100 text-white-800 rounded">
+                    {{ $appointment->status }}
+                    </span>
+                </td>
 
                 <td class="px-4 py-2">
     @if($appointment->status === 'scheduled')
-        <a href="{{ route('appointments.show', $appointment->id) }}" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">View</a>
-        <a href="{{ route('appointments.edit', $appointment->id) }}" class="bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">Edit</a>
-        <a href="{{ route('appointments.customer_arrived', $appointment->id) }}" class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">Customer Arrived</a>
+        <a href="{{ route('appointments.show', $appointment->id) }}" class="bg-gray-800 text-white  px-3 py-1 rounded">View</a>
+        <a href="{{ route('appointments.edit', $appointment->id) }}" class="bg-gray-800 text-white  px-3 py-1 rounded ">Edit</a>
+        <a href="{{ route('appointments.customer_arrived', $appointment->id) }}" class="bg-gray-800 text-white px-3 py-1 rounded">Customer Arrived</a>
     
     @elseif($appointment->status === 'completed')
-        <a href="{{ route('appointments.show', $appointment->id) }}" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">View</a>
+        <a href="{{ route('appointments.show', $appointment->id) }}" class="bg-gray-800 text-white text-xs px-3 py-1 rounded ">View</a>
 
     @elseif($appointment->status === 'cancelled')
         {{-- No buttons --}}
@@ -70,11 +74,11 @@ $subtitle = 'Manage and View all the appointmeents here';
        <div class="mt-4 px-4 mb-2">
 <nav role="navigation" aria-label="Pagination Navigation" class="flex items-center justify-between">
 <div class="flex justify-between flex-1 sm:hidden">
-            <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md dark:text-gray-600 dark:bg-gray-800 dark:border-gray-600">
+            <span class="relative inline-flex items-center px-4 py-2 font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md dark:text-gray-600 dark:bg-gray-800 dark:border-gray-600">
     &laquo; Previous
 </span>
 
-            <a href="#" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:focus:border-blue-700 dark:active:bg-gray-700 dark:active:text-gray-300">
+            <a href="#" class="relative inline-flex items-center px-4 py-2 ml-3  font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:focus:border-blue-700 dark:active:bg-gray-700 dark:active:text-gray-300">
     Next &raquo;
 </a>
     </div>

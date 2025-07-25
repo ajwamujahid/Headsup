@@ -1,7 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-                    
+@php
+$title = 'Dashboard';
+$subtitle = '';
+@endphp       
                     <!-- Page Content -->
                     <main class="flex-1 overflow-y-auto">
                         <div class="py-6">

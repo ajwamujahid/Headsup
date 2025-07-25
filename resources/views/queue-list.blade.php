@@ -127,78 +127,109 @@
     .highlight-turn {
       background-color: #222d44 !important;
       font-weight: bold;
-      box-shadow: 0 0 15px #44f;
+      box-shadow: 0 0 15px rgb(107, 107, 186);
     }
-    
+    .highlight-t {
+    background-color: #4455aa !important;
+    box-shadow: 0 0 15px rgb(107, 107, 186);
+}
+
   </style>
+ 
+  
 <style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.mt-1{margin-top:0.25rem}.inline-block{display:inline-block}.flex{display:flex}.w-\[25\%\]{width:25%}.w-full{width:100%}.flex-1{flex:1 1 0%}.flex-col{flex-direction:column}.overflow-hidden{overflow:hidden}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-nowrap{white-space:nowrap}.px-4{padding-left:1rem;padding-right:1rem}.text-center{text-align:center}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-base{font-size:1rem;line-height:1.5rem}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}</style></head>
 <body>
-    <div id="container">
-        {{-- <section class="flex-1">
-          <!-- T/O buttons here -->
-          {{-- @foreach($customers as $customer)
-            <button type="button"
-                    class="toBtn"
-                    data-salesperson="{{ $customer->salesperson->name }}"
-                    data-customer="{{ $customer->name }}"
-                    data-time="{{ now()->format('h:i A') }}"
-                    data-salesperson-id="{{ $customer->salesperson->id }}">
-              T/O
-            </button>
-          @endforeach --}}
   
-    
-        <section class="w-[25%]">
-          <div id="checkin-info" class="hidden">
-            <p><strong>Salesperson:</strong> <span id="checkin-salesperson">-</span></p>
-            <p><strong>Customer:</strong> <span id="checkin-customer">-</span></p>
-            <p><strong>Check-in Time:</strong> <span id="checkin-time">-</span></p>
-          </div>
-      
-          <!-- Salesperson Forms -->
-          @foreach($allSalespeople as $salesperson)
+  @php
+    $highlightCustomerId = session('highlight_customer_id');
+@endphp
+@php
+    $highlightCustomerId = session('highlight_customer_id');
+    $customers = collect($customers);
 
-            <div class="sales-form hidden" data-salesperson-id="{{ $salesperson->id }}">
-              <!-- Include form here -->
+    if ($highlightCustomerId) {
+        $highlighted = $customers->firstWhere('id', $highlightCustomerId);
+        $customers = $customers->reject(fn($c) => $c->id == $highlightCustomerId);
+        $customers = $customers->prepend($highlighted); // ✅ Fixed line
+    }
+@endphp
+
+  <div id="container">
+    <section class="flex-1">
+      <h1>Status</h1>
+      <div class="token-heading">
+        <div>Salesperson</div>
+        <div>Customer</div>
+        <div>Status</div>
+      </div>
+     
+      <div id="tokenList" class="scrollable">
+      
+        @foreach ($customers as $c)
+        <div id="queue-row-{{ $c->id }}" 
+             class="active-token-row cursor-pointer" 
+             data-customer-id="{{ $c->id }}">
+            <div>{{ $c->salesperson->name ?? 'N/A' }}</div>
+            <div>{{ $c->name }}</div>
+            <div>
+                <span class="status-badge">
+                    {{ is_array($c->process) ? implode(', ', $c->process) : ($c->process ?? 'N/A') }}
+                </span>
             </div>
-          @endforeach
-        </section>
+        </div>
+    @endforeach
+    
       </div>
       
 
-
-
-
-      <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const toBtns = document.querySelectorAll('.toBtn');
-            const checkinInfo = document.getElementById('checkin-info');
-        
-            toBtns.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const salesperson = this.dataset.salesperson;
-                    const customer = this.dataset.customer;
-                    const time = this.dataset.time;
-                    const salespersonId = this.dataset.salespersonId;
-        
-                    // Fill right-side panel
-                    document.getElementById('checkin-salesperson').textContent = salesperson;
-                    document.getElementById('checkin-customer').textContent = customer;
-                    document.getElementById('checkin-time').textContent = time;
-                    checkinInfo.classList.remove('hidden');
-        
-                    // Hide all forms
-                    document.querySelectorAll('.sales-form').forEach(form => form.classList.add('hidden'));
-        
-                    // Show current salesperson's form
-                    const currentForm = document.querySelector(`.sales-form[data-salesperson-id="${salespersonId}"]`);
-                    if (currentForm) currentForm.classList.remove('hidden');
-                });
-            });
-        });
-        </script>
-        
     
+    </section>
 
-</body>
-</html>
+    <section class="w-[25%]">
+      <h1>Check-In</h1>
+      <div class="token-heading" style="grid-template-columns: 1fr;">
+        <div>Name &amp; Time</div>
+      </div>
+      <div id="checkinList" class="scrollable">
+        @php
+        $latestCheckinId = $checkedInSalespeople->first()->salesperson_id ?? null;
+    @endphp
+    
+    @foreach($checkedInSalespeople as $checkin)
+    <div class="checkin-row {{ $checkin->salesperson_id == $latestCheckinId ? 'highlight-turn' : '' }}">
+        <div class="flex flex-col w-full overflow-hidden px-4">
+            <strong>{{ $checkin->salesperson->name ?? 'N/A' }}</strong>
+            <span class="text-xs text-muted-foreground">{{ $checkin->created_at->diffForHumans() }}</span>
+        </div>
+    </div>
+@endforeach
+
+    
+    </div>
+      
+        </div>
+      </div></div>
+    </section>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const data = localStorage.getItem('highlightCustomerTrigger');
+        if (data) {
+            const { customerId } = JSON.parse(data);
+
+            const row = document.getElementById(`queue-row-${customerId}`);
+            if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                row.classList.add('highlight-t');
+
+                setTimeout(() => {
+                    row.classList.remove('highlight-t');
+                    localStorage.removeItem('highlightCustomerTrigger'); // clear after done
+                }, 6000); // 4 Minutes
+            }
+        }
+    });
+</script>
+
+
+</body></html>
