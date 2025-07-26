@@ -42,18 +42,18 @@ class AppointmentController extends Controller
         ]);
     }
 
-    // Show single completed appointment
     public function show($id)
-    {
-        $appointment = Appointment::with('salesperson')->findOrFail($id);
+{
+    $appointment = Appointment::with('salesperson')->findOrFail($id); // <-- Fetch appointment first
 
-        // Only show if completed
-        if ($appointment->status !== 'completed') {
-            abort(403, 'This appointment is not completed yet.');
-        }
-
-        return view('appointments.show', ['appointments' => [$appointment]]);
+    $allowedStatuses = ['completed', 'scheduled']; // Allow multiple statuses
+    if (!in_array($appointment->status, $allowedStatuses)) {
+        abort(403, 'This appointment is not accessible yet.');
     }
+    
+    return view('appointments.show', ['appointments' => [$appointment]]);
+}
+
 
     // Show customer arrival form
     public function showArrivalForm($id)

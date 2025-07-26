@@ -24,7 +24,7 @@ $subtitle = 'OverView';
                         </div>
                         <div class="ml-4">
                             <p class="mb-2 text-sm font-medium text-muted-foreground">Total Sales Persons</p>
-                            {{-- <p class="text-lg font-semibold text-foreground">{{ $totalSalesperson }}</p> --}}
+                            <p class="text-lg font-semibold text-foreground">{{ $totalSalespersons }}</p>
                             
                         </div>
                     </div>
@@ -40,7 +40,7 @@ $subtitle = 'OverView';
                         </div>
                         <div class="ml-4">
                             <p class="mb-2 text-sm font-medium text-muted-foreground">Total Customers</p>
-                            {{-- <p class="text-lg font-semibold text-foreground">{{ $totalCustomers }}</p> --}}
+                            <p class="text-lg font-semibold text-foreground">{{ $totalCustomers }}</p>
                                 
                         </div>
                     </div>
@@ -57,7 +57,7 @@ $subtitle = 'OverView';
                         </div>
                         <div class="ml-4">
                             <p class="mb-2 text-sm font-medium text-muted-foreground">Total Appointments</p>
-                            {{-- <p class="text-lg font-semibold text-foreground">{{ $totalAppointments }}</p> --}}
+                            <p class="text-lg font-semibold text-foreground">{{ $totalAppointments }}</p>
                                   
                         </div>
                     </div>

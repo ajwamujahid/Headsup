@@ -70,7 +70,8 @@
                                         </div>
                                         <div class="flex flex-col items-start">
                                             <span class="font-medium text-gray-800">{{ session('sales_name') }}</span>
-                                            <span class="text-xs text-gray-500">{{ session('sales_role') }}</span>
+                                            <span class="text-xs text-gray-500">{{ session('role') ?? 'No Role Found' }}</span>
+
                                             
                                         </div>
                                         <svg class="h-4 w-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
