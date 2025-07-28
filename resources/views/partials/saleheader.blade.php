@@ -94,8 +94,9 @@ style="display: none;"
             <div class="p-2">
                                                         <!-- User Info -->
                                                         <div class="px-2 py-1.5">
-                                                            <p class="text-sm font-medium text-foreground">admin@admin.com</p>
-                                                            <p class="text-xs text-muted-foreground mt-0.5">Joined Jul 2025</p>
+                                                            <p class="text-sm font-medium text-foreground">  
+                                                                {{ session('sales_email') ?? 'No Email' }}</p>
+                                                            <p class="text-xs text-muted-foreground mt-0.5">  Login: {{ \Carbon\Carbon::parse(session('login_time'))->format('d M Y, h:i A') }}</p>
                                                         </div>
                                                         
                                                         <div class="my-1 h-px bg-accent"></div>

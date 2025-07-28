@@ -268,18 +268,7 @@ Checked Out
   @foreach ($customers as $c)
   <div class="customer-card bg-white border rounded-lg p-4 shadow-sm space-y-1 mt-3
   {{ $c->salesperson_id == session('sales_id') ? 'cursor-pointer' : 'opacity-50 pointer-events-none' }}
-  {{ $lastCustomer && $c->id === $lastCustomer->id ? 'last-active' : '' }}"
-  
-  data-name="{{ $c->name }}"
-  data-email="{{ $c->email }}"
-  data-phone="{{ $c->phone }}"
-  data-interest="{{ $c->interest }}"
-  data-notes="{{ $c->notes }}"
-  data-process='@json($c->process)'
-
-  data-disposition="{{ $c->disposition }}"
->
-
+  {{ $lastCustomer && $c->id === $lastCustomer->id ? 'last-active' : '' }}" data-name="{{ $c->name }}" data-email="{{ $c->email }}" data-phone="{{ $c->phone }}" data-interest="{{ $c->interest }}" data-notes="{{ $c->notes }}" data-process='@json($c->process)' data-disposition="{{ $c->disposition }}">
       <h3 class="font-semibold text-indigo-600 text-sm uppercase tracking-wide">Customer Info</h3>
       <p class="text-sm bg-indigo-100 text-gray-700"><strong>Sales Person:</strong> {{ $c->salesperson->name ?? 'N/A' }}</p>
       <p class="text-sm text-gray-700"><strong>Name:</strong> {{ $c->name ?? '-' }}</p>
@@ -363,44 +352,7 @@ Checked Out
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pusher-js@7.2.0/dist/web/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/laravel-echo/dist/echo.iife.js"></script>
-<script>
-  document.querySelectorAll('.toBtn').forEach(button => {
-      button.addEventListener('click', function () {
-          const customer = {
-              id: this.dataset.id,
-              name: this.dataset.name,
-              salesperson: this.dataset.salesperson,
-              process: this.dataset.process,
-          };
-  
-          // Start loading spinner
-          this.querySelector('.toSpinner').classList.remove('hidden');
-  
-          // Send data to backend via POST
-          fetch('/queues/takeover', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'X-CSRF-TOKEN': '{{ csrf_token() }}'
-              },
-              body: JSON.stringify(customer)
-          })
-          .then(response => response.json())
-          .then(data => {
-              // Remove spinner
-              this.querySelector('.toSpinner').classList.add('hidden');
-  
-              // Redirect or show success (optional)
-              window.location.href = '/queues'; // reload with highlighted
-          })
-          .catch(error => {
-              console.error('Error:', error);
-              this.querySelector('.toSpinner').classList.add('hidden');
-          });
-      });
-  });
-  </script>
-  
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
       const toBtns = document.querySelectorAll('.toBtn');
@@ -446,48 +398,6 @@ Checked Out
         document.querySelector("#appointment-form").addEventListener("submit", function () {
             input.value = iti.getNumber(); // This will convert to +923001234567
         });
-    });
-</script>
-
-<script>
-    Pusher.logToConsole = false;
-    const pusher = new Pusher('your-pusher-key', {
-        cluster: 'your-pusher-cluster',
-        encrypted: true
-    });
-
-    const channel = pusher.subscribe('customers');
-
-    channel.bind('customer.transferred', function (data) {
-        const customerCard = document.querySelector(`.customer-card[data-id="${data.id}"]`);
-        
-        if (customerCard) {
-            customerCard.remove(); // Remove from current list
-        }
-
-        // If this is the new salesperson
-        if (parseInt(data.salesperson_id) === parseInt({{ session('sales_id') }})) {
-            const html = `
-            <div class="customer-card bg-white border rounded-lg p-4 shadow-sm space-y-1 mt-3" data-id="${data.id}">
-                <h3 class="font-semibold text-indigo-600 text-sm uppercase tracking-wide">Customer Info</h3>
-                <p class="text-sm bg-indigo-100 text-gray-700"><strong>Sales Person:</strong> ${data.salesperson_name}</p>
-                <p class="text-sm text-gray-700"><strong>Name:</strong> ${data.name}</p>
-                <p class="text-sm text-gray-700"><strong>Email:</strong> ${data.email}</p>
-                <p class="text-sm text-gray-700"><strong>Phone:</strong> ${data.phone}</p>
-                <p class="text-sm text-gray-700"><strong>Process:</strong> ${Array.isArray(JSON.parse(data.process)) ? JSON.parse(data.process).join(', ') : 'N/A'}</p>
-                <p class="text-sm text-gray-700"><strong>Disposition:</strong> ${data.disposition ?? 'N/A'}</p>
-                <div class="pt-2">
-                    <button 
-                        class="w-full bg-gray-800 text-white px-6 py-2 rounded mb-4 transfer-btn" 
-                        data-id="${data.id}" 
-                        data-name="${data.name}">
-                        Transfer
-                    </button>
-                </div>
-            </div>`;
-
-            document.getElementById('customer-list').insertAdjacentHTML('afterbegin', html);
-        }
     });
 </script>
 
@@ -551,7 +461,7 @@ window.salespersons = @json($salesperson); // comes from controller
             const turnStatus = document.getElementById("turn-status");
             if (turnStatus) {
                 turnStatus.textContent = " It's your turn!";
-                turnStatus.classList.add("text-green-600", "font-semibold");
+                turnStatus.classList.add("text-gray-600", "font-semibold");
             }
         }
     });
@@ -1085,11 +995,11 @@ Swal.fire({
                   // ✅ It's your turn — enable button
                   takeCustomerBtn.disabled = false;
                   takeCustomerBtn.classList.remove('bg-gray-800');
-                  takeCustomerBtn.classList.add('bg-green-600');
+                  takeCustomerBtn.classList.add('bg-gray-600');
               } else {
                   // ❌ Not your turn — disable button
                   takeCustomerBtn.disabled = true;
-                  takeCustomerBtn.classList.remove('bg-green-600');
+                  takeCustomerBtn.classList.remove('bg-gray-600');
                   takeCustomerBtn.classList.add('bg-gray-800');
               }
           });

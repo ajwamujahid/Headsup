@@ -1,10 +1,14 @@
-@extends('layouts.saledashboard')
+@extends('layouts.app')
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/css/intlTelInput.css" />
    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     @endpush
 @section('content')
+@php
+$title = 'Edit User';
+$subtitle = 'Add a new Sale Person to the system.';
+@endphp
  <!-- Page Content -->
  <main class="flex-1 overflow-y-auto">
     <div class="py-6">
