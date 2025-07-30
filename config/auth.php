@@ -74,6 +74,13 @@ return [
         'driver' => 'eloquent',
         'model' => App\Models\SalesProfile::class,
     ],
+    
+    'users' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\SalesProfile::class,
+    ],
+
+
 ],
 
     /*

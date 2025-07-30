@@ -132,9 +132,10 @@ use App\Http\Controllers\SalesCustomerController;
 
 Route::prefix('salesperson')->name('salesperson.')->group(function () {
     Route::get('/customer', [SalesCustomerController::class, 'index'])->name('customer.index');
-    Route::get('/customer/create', [SalesCustomerController::class, 'create'])->name('customer.create');
+    Route::get('/customer/add', [SalesCustomerController::class, 'add'])->name('customer.add');
     Route::post('/customer/store', [SalesCustomerController::class, 'store'])->name('customer.store');
 });
+Route::post('/trigger-highlight', [SalesPersonController::class, 'triggerHighlight']);
 
 
 Route::prefix('salesperson')->name('salesperson.')->group(function () {
@@ -151,3 +152,33 @@ use App\Http\Controllers\QueueController;
 
 Route::get('/queues', [QueueController::class, 'index'])->name('queues.index');
 Route::post('/highlight-customer', [QueueController::class, 'highlightCustomer'])->name('highlight.customer');
+use App\Events\CustomerHighlighted;
+
+Route::get('/highlight-customer/{id}', function ($id) {
+    $salespersonName = 'John Doe'; // You can fetch from DB
+    event(new CustomerHighlighted($id, $salespersonName));
+    return 'Highlight Triggered!';
+});
+Route::get('/api/sales-checkins', function() {
+    $checkins = \App\Models\SalesCheckin::with('salesperson') // Assuming relationship exists
+                ->latest('check_in_time')
+                ->take(10) // You can paginate as needed
+                ->get();
+
+    return response()->json($checkins);
+});
+Route::post('/api/complete-customer', [QueueController::class, 'completeCustomer']);
+Route::get('/checkin-list-fragment', function () {
+    $todayCheckins = \App\Models\SalesCheckin::with('salesperson')
+        ->whereDate('created_at', now()->toDateString())
+        ->latest()
+        ->get();
+
+    $checkedInSalespeople = $todayCheckins->unique('salesperson_id');
+
+    return view('partials.checkin-list', ['checkedInSalespeople' => $checkedInSalespeople]);
+});
+Route::get('/salesperson/{id}', function ($id) {
+    $name = \App\Models\SalesProfile::where('id', $id)->value('name');
+    return response()->json(['name' => $name ?? 'Unknown']);
+});

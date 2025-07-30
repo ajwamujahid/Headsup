@@ -8,13 +8,13 @@
 
         <title>HeadsUp</title>
 
-        <!-- Fonts -->
+        <link rel="icon" type="image/svg+xml" href="https://headsup.trevinosauto.com/favicon.svg">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
         <link rel="preload" as="style" href="https://headsup.trevinosauto.com/build/assets/app-Crok822L.css" /><link rel="modulepreload" href="https://headsup.trevinosauto.com/build/assets/app-DeKemmCm.js" /><link rel="stylesheet" href="https://headsup.trevinosauto.com/build/assets/app-Crok822L.css" /><script type="module" src="https://headsup.trevinosauto.com/build/assets/app-DeKemmCm.js"></script>    </head>
-    <body class="h-full bg-gray-50 font-sans antialiased">
+    </head>
+
+        <body class="h-full bg-gray-50 font-sans antialiased">
         <div class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
             <div class="w-full max-w-md">
                 <div class="bg-white border border-gray-200 rounded-xl shadow-md p-8">

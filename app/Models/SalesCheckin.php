@@ -29,10 +29,14 @@ class SalesCheckin extends Model
         'check_in_time',
         'check_out_time',
     ];
-
-    // Relationship with SalesProfile
     public function salesperson()
     {
-        return $this->belongsTo(\App\Models\SalesProfile::class, 'salesperson_id');
+        return $this->belongsTo(SalesProfile::class, 'salesperson_id');
     }
+    
+    // Relationship with SalesProfile
+    // public function salesperson()
+    // {
+    //     return $this->belongsTo(\App\Models\SalesProfile::class, 'salesperson_id');
+    // }
 }

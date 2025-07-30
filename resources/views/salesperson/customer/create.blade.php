@@ -29,8 +29,9 @@ background-color: #111827 !important;
 </style>
 
 <div class="px-4">
-<form id="salesForm" method="POST" action="{{ route('customer.store') }}"
+<form id="salesForm" method="POST" action="{{ route('salesperson.customer.store') }}"
 class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
+<input type="hidden" name="salesperson_id" value="{{ session('sales_id') }}">
 @csrf
 
 
@@ -248,46 +249,41 @@ const salesForm = document.getElementById('salesForm');
 openModalBtn?.addEventListener('click', () => modal.classList.remove('hidden'));
 closeModalBtn?.addEventListener('click', () => modal.classList.add('hidden'));
 window.addEventListener('click', (e) => {
-if (e.target === modal) modal.classList.add('hidden');
+    salesForm?.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    // Add this block to see what data is going to server
+    console.log('FormData going to server:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+
+    fetch(this.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+        },
+        body: formData,
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log(data);
+        if (data.status === 'success') {
+            Swal.fire('Success', data.message, 'success').then(() => {
+                window.location.href = data.redirect;
+            });
+        } else {
+            Swal.fire('Error', 'Something went wrong!', 'error');
+        }
+    })
+    .catch(err => {
+        Swal.fire('Error', 'Request failed!', 'error');
+        console.error(err);
+    });
 });
 
-// ✅ AJAX form submit with Swal
-salesForm?.addEventListener('submit', function (e) {
-e.preventDefault();
-
-const formData = new FormData(this);
-const url = this.action;
-
-fetch(url, {
-method: 'POST',
-headers: {
-'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-},
-body: formData,
-})
-.then(res => res.json())
-.then(data => {
-if (data.status === 'success') {
-Swal.fire({
-icon: 'success',
-title: 'Success!',
-text: data.message,
-confirmButtonColor: '#111827',
-}).then(() => {
-window.location.href = data.redirect;
-});
-
-modal.classList.add('hidden');
-salesForm.reset();
-}
-else {
-Swal.fire('Error', 'Something went wrong!', 'error');
-}
-})
-.catch(err => {
-Swal.fire('Error', 'Request failed!', 'error');
-console.error(err);
-});
 });
 });
 </script>
@@ -418,7 +414,7 @@ document.addEventListener('click', (event) => {
         utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"
     });
 
-    const form = document.querySelector("#updateForm");
+    const form = document.querySelector("#salesForm");
     form.addEventListener("submit", function () {
         input.value = iti.getNumber(); // sets hidden full number
     });

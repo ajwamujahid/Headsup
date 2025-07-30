@@ -45,12 +45,14 @@ $subtitle = 'Manage and View all the appointmeents here';
 
                 <td class="px-4 py-2">
     @if($appointment->status === 'scheduled')
-        <a href="{{ route('appointments.show', $appointment->id) }}" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">View</a>
-        <a href="{{ route('appointments.edit', $appointment->id) }}" class="bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">Edit</a>
-        <a href="{{ route('appointments.customer_arrived', $appointment->id) }}" class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">Customer Arrived</a>
-    
+        <a href="{{ route('salesperson.appointments.show', $appointment->id) }}" class="bg-gray-800 text-white px-3 py-1 rounded">View</a>
+        <a href="{{ route('salesperson.appointments.edit', $appointment->id) }}" class="bg-gray-800 text-white  px-3 py-1 rounded">Edit</a>
+        <a href="{{ route('salesperson.appointments.arrival', $appointment->id) }}"  class="bg-gray-800 text-white  px-3 py-1 rounded" >
+            Customer Arrived
+        </a>
+        
     @elseif($appointment->status === 'completed')
-        <a href="{{ route('appointments.show', $appointment->id) }}" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">View</a>
+        <a href="{{ route('appointments.show', $appointment->id) }}" class="bg-gray-800 text-white  px-3 py-1 rounded">View</a>
 
     @elseif($appointment->status === 'cancelled')
         {{-- No buttons --}}

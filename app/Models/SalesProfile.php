@@ -33,5 +33,14 @@ public function activeCheckin()
     return $this->hasOne(SalesCheckin::class, 'salesperson_id')
                 ->whereNull('check_out_time');
 }
-  
+public function getSalespersonName($id)
+{
+    $salesperson = SalesProfile::find($id);
+
+    if ($salesperson) {
+        return $salesperson->name;
+    } else {
+        return 'Unknown Salesperson';
+    }
+}
 }

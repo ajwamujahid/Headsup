@@ -74,7 +74,7 @@ $subtitle = 'OverView';
                         </div>
                         <div class="ml-4">
                             <p class="mb-2 text-sm font-medium text-muted-foreground">Sold Customers</p>
-                            <p class="text-lg font-semibold text-foreground">0</p>
+                            <p class="text-lg font-semibold text-foreground">2</p>
                         </div>
                     </div>
                 </div>

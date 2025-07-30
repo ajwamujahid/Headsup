@@ -23,7 +23,7 @@ $subtitle = 'Schedule a new appointment by filling out the form below.';
             
             
             <div class="mb-4 flex items-center px-6" style="display: flex; justify-content: end;">
-                           <a href="{{ route('salesperson.customer.create') }}" class="bg-gray-800 text-white px-3 py-1.5 rounded">
+                           <a href="{{ route('salesperson.customer.add') }}" class="bg-gray-800 text-white px-3 py-1.5 rounded">
                                Add Customer
                            </a>
                        </div>
@@ -98,8 +98,11 @@ $subtitle = 'Schedule a new appointment by filling out the form below.';
                                     <td class="border-b px-4 py-2">{{ $customer->name }}</td>
                                     <td class="border-b px-4 py-2">{{ $customer->created_at->format('d M Y h:i A') }}</td>
                                     <td class="border-b px-4 py-2">
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold bg-green-100 text-white rounded mr-1 mb-1">
                                         @php
-                                            $process = json_decode($customer->process, true);
+                                            $process = is_array($customer->process) 
+                                                ? $customer->process 
+                                                : json_decode($customer->process, true);
                                         @endphp
                                         @if ($process)
                                             <ul class="list-disc pl-4 text-sm text-gray-700">
@@ -110,8 +113,13 @@ $subtitle = 'Schedule a new appointment by filling out the form below.';
                                         @else
                                             <span class="text-gray-400">-</span>
                                         @endif
+                                        </
                                     </td>
-                                    <td class="border-b px-4 py-2">{{ $customer->disposition ?? '-' }}</td>
+                                    
+                                    <td class="border-b px-4 py-2">
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold bg-gray-800 text-white rounded mr-1 mb-1">{{ $customer->disposition ?? '-' }}
+                                        </span>
+                                        </td>
                                     <td class="border-b px-4 py-2">
                                         {{ $customer->created_at->diffForHumans() }}
                                     </td>
@@ -168,7 +176,7 @@ $subtitle = 'Schedule a new appointment by filling out the form below.';
                                                                                                                         <span aria-current="page">
                                         <span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 dark:bg-gray-800 dark:border-gray-600">1</span>
                                     </span>
-                                                                                                                                <a href="https://headsup.trevinosauto.com/add/users?page=2" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:text-gray-300 dark:active:bg-gray-700 dark:focus:border-blue-800" aria-label="Go to page 2">
+                                                                                                                                <a href="" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:text-gray-300 dark:active:bg-gray-700 dark:focus:border-blue-800" aria-label="Go to page 2">
                                         2
                                     </a>
                                                                                                                                 <a href="https://headsup.trevinosauto.com/add/users?page=3" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:text-gray-300 dark:active:bg-gray-700 dark:focus:border-blue-800" aria-label="Go to page 3">

@@ -29,9 +29,12 @@ $subtitle = 'Manage and View all the appointmeents here';
    
   <div class="px-4">
      <div id="formContainer">
-      <form id="salesForm" method="POST" action="{{ route('customers.store') }}"
-        class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
-       @csrf
+      <form id="salesForm" method="POST" action="{{ route('salesperson.customer.store') }}"
+      class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
+      <input type="hidden" name="salesperson_id" value="{{ session('sales_id') }}">
+      @csrf
+      
+      
         <div class="md:col-span-2">
           <h3 class="text-2xl font-bold text-gray-800 leading-tight mb-0">Customer Sales Form</h3>
           <p class="text-gray-500 mt-0 leading-tight">Fill out the details below to log a customer sales interaction.</p>
@@ -255,43 +258,41 @@ $subtitle = 'Manage and View all the appointmeents here';
 
     // ✅ AJAX form submit with Swal
     salesForm?.addEventListener('submit', function (e) {
-      e.preventDefault();
+    e.preventDefault();
 
-      const formData = new FormData(this);
-      const url = this.action;
+    const formData = new FormData(this);
 
-      fetch(url, {
+    // 🟢 Ensure salesperson_id is always included
+    const salespersonId = document.querySelector('input[name="salesperson_id"]').value;
+    formData.set('salesperson_id', salespersonId);
+
+    const url = this.action;
+
+    fetch(url, {
         method: 'POST',
         headers: {
-          'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,  // CSRF Token ensure
         },
         body: formData,
-      })
-      .then(res => res.json())
-      .then(data => {
-      if (data.status === 'success') {
-  Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: data.message,
-                confirmButtonColor: '#111827',
-            }).then(() => {
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire('Success', data.message, 'success').then(() => {
                 window.location.href = data.redirect;
             });
-
-  modal.classList.add('hidden');
-  salesForm.reset();
-}
- else {
-          Swal.fire('Error', 'Something went wrong!', 'error');
+        } else {
+            Swal.fire('Error', 'Something went wrong!', 'error');
         }
-      })
-      .catch(err => {
+    })
+    .catch(err => {
         Swal.fire('Error', 'Request failed!', 'error');
         console.error(err);
-      });
     });
-  });
+});
+
+    });
+
 </script>
                 <script>
             // Initialize notification listener
@@ -420,9 +421,11 @@ $subtitle = 'Manage and View all the appointmeents here';
                     utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"
                 });
         
-                document.querySelector("#appointment-form").addEventListener("submit", function () {
-                    input.value = iti.getNumber(); // This will convert to +923001234567
-                });
+                document.querySelector("#salesForm").addEventListener("submit", function () {
+    input.value = iti.getNumber();  // This will convert to +923001234567
+});
+
+               
             });
         </script>
   @endpush

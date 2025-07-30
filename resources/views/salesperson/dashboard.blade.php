@@ -315,6 +315,45 @@ Checked Out
 @endsection
 @push('scripts')
 <script>
+  
+  document.getElementById('toBtn').addEventListener('click', function() {
+      const customerIdInput = document.getElementById('currentCustomerId');
+      const customerId = customerIdInput ? customerIdInput.value : null;
+  
+      if (customerId) {
+          // Save trigger in localStorage
+          localStorage.setItem('highlightCustomerTrigger', JSON.stringify({ customerId }));
+         alert('T/O Request Sent!');
+      } else {
+          alert('No Customer ID Found!');
+      }
+  });
+  </script>
+{{--   
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('toBtn').addEventListener('click', function() {
+          const customerId = document.getElementById('currentCustomerId').value;
+
+          if (customerId) {
+              // Store Customer ID for highlighting
+              localStorage.setItem('highlightCustomerTrigger', JSON.stringify({ customerId }));
+
+              // Speak "T/O Request Contain"
+              const msg = new SpeechSynthesisUtterance("T/O Request Contain");
+              msg.lang = 'en-US';
+              msg.rate = 1; // Adjust speed (1 is normal)
+              speechSynthesis.speak(msg);
+
+              // Optional Alert (Disabled)
+              // alert('Customer Highlight Triggered to Queue Page!');
+          } else {
+              alert('No Customer ID Found!');
+          }
+      });
+  });
+</script> --}}
+<script>
   document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('toBtn').addEventListener('click', function() {
           const customerId = document.getElementById('currentCustomerId').value;
@@ -343,7 +382,33 @@ Checked Out
       });
     });
 </script>
-
+<script>
+  document.getElementById('toBtn').addEventListener('click', function() {
+      const customerCard = document.querySelector('.last-active'); // Get the active customer card
+      if (!customerCard) return;
+  
+      const customerId = customerCard.getAttribute('data-id') || customerCard.getAttribute('data-customer-id');
+      if (!customerId) return;
+  
+      // Call API to trigger highlight
+      fetch('/takeover-highlight', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          },
+          body: JSON.stringify({ customer_id: customerId })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.status === 'success') {
+              window.location.href = '/queues'; // Redirect to queues page
+          }
+      });
+  });
+  
+  </script>
+  
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/intlTelInput.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"></script>
 <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
@@ -416,57 +481,67 @@ window.salespersons = @json($salesperson); // comes from controller
 <!-- Pass PHP data to JS safely -->
 <script>
     const salespeopleOptions = @json($salespeople->pluck('name', 'id'));
+    
 </script>
 <script>
   axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
   axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 </script>
-
 <script>
   document.addEventListener("DOMContentLoaded", function () {
       let isMyTurn = @json($isMyTurn);
+      const salespersonName = @json(optional(Auth::user())->name);
       const takeCustomerBtn = document.getElementById("takeCustomerBtn");
       const turnStatus = document.getElementById("turn-status");
-      const customerForm = document.getElementById("customerFormModal"); // change ID if different
-  
-      // Update turn message & button status
+      const customerForm = document.getElementById("customerFormModal");
+
+      // Preload voices on user interaction
+      document.addEventListener('click', () => {
+          window.speechSynthesis.getVoices();
+      }, { once: true });
+
       if (isMyTurn) {
-          turnStatus.textContent = "🎯 It's your turn!";
-          turnStatus.classList.add("text-grey-600", "font-semibold");
+          turnStatus.textContent = "It's your turn!";
+          turnStatus.classList.add("text-gray-600", "font-semibold");
           takeCustomerBtn?.removeAttribute("disabled");
           takeCustomerBtn?.classList.remove("opacity-50", "cursor-not-allowed");
       } else {
           takeCustomerBtn?.setAttribute("disabled", "true");
           takeCustomerBtn?.classList.add("opacity-50", "cursor-not-allowed");
-          turnStatus.textContent = "❗ Please check in to activate your turn queue.";
+          turnStatus.textContent = "Please check in to activate your turn queue.";
       }
-  
-      // On click logic
+
       takeCustomerBtn?.addEventListener("click", function (e) {
           e.preventDefault();
-  
-          if (isMyTurn) {
-    Swal.fire({
-        title: 'Customer Assigned!',
-        text: "You may now fill the customer form.",
-        icon: 'success',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'OK'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // ✅ 1. Show the form/modal
-            customerForm?.classList.remove("hidden");
 
-            // ✅ 2. Update the text to show it's their turn
-            const turnStatus = document.getElementById("turn-status");
-            if (turnStatus) {
-                turnStatus.textContent = " It's your turn!";
-                turnStatus.classList.add("text-gray-600", "font-semibold");
-            }
-        }
-    });
-}
- else {
+          if (isMyTurn) {
+              // ✅ Speak salesperson name + it's your turn
+              const msg = new SpeechSynthesisUtterance(`${salespersonName}, it's your turn`);
+              msg.lang = 'en-US';
+              msg.rate = 1;
+
+              msg.onend = function () {
+                  // ✅ Show SweetAlert after speech finishes
+                  Swal.fire({
+                      title: 'Customer Assigned!',
+                      text: "You may now fill the customer form.",
+                      icon: 'success',
+                      confirmButtonColor: '#3085d6',
+                      confirmButtonText: 'OK'
+                  }).then((result) => {
+                      if (result.isConfirmed) {
+                          customerForm?.classList.remove("hidden");
+                          if (turnStatus) {
+                              turnStatus.textContent = "It's your turn!";
+                              turnStatus.classList.add("text-gray-600", "font-semibold");
+                          }
+                      }
+                  });
+              };
+
+              speechSynthesis.speak(msg);
+
+          } else {
               Swal.fire({
                   icon: 'info',
                   title: 'Not your turn!',
@@ -475,9 +550,8 @@ window.salespersons = @json($salesperson); // comes from controller
           }
       });
   });
-  </script>
-  
-  
+</script>
+
 
 <script>
   
@@ -674,7 +748,7 @@ window.salespersons = @json($salesperson); // comes from controller
             checkText.textContent = "Check In";
             checkBtn?.classList.replace("bg-red-500", "bg-green-500");
             checkOutTimeEl.textContent = formatDateTime(new Date());
-            turnStatus.textContent = "🚫 Not in queue";
+            turnStatus.textContent = "Not in queue";
             newCustomerBtn?.classList.add("hidden");
             addCustomerBtn?.classList.add("hidden");
             durationWrapper?.classList.add("hidden");
@@ -698,7 +772,7 @@ window.salespersons = @json($salesperson); // comes from controller
             statusText.innerHTML = `✅ Checked In`;
             statusText.classList.replace("bg-red-100", "bg-green-100");
             statusText.classList.replace("text-red-700", "text-green-700");
-            turnStatus.textContent = "⏳ Waiting for your turn...";
+            turnStatus.textContent = "Waiting for your turn...";
             newCustomerBtn?.classList.remove("hidden");
             addCustomerBtn?.classList.remove("hidden");
             durationWrapper?.classList.remove("hidden");
@@ -728,7 +802,7 @@ window.salespersons = @json($salesperson); // comes from controller
                     takeCustomerBtn?.classList.remove("opacity-50", "cursor-not-allowed");
 
                     if (turnStatus) {
-                        turnStatus.textContent = "🎯 It's your turn!";
+                        turnStatus.textContent = "It's your turn!";
                         turnStatus.classList.add("text-grey-600", "font-semibold");
                     }
                 } else {
@@ -736,7 +810,7 @@ window.salespersons = @json($salesperson); // comes from controller
                     takeCustomerBtn?.classList.add("opacity-50", "cursor-not-allowed");
 
                     if (turnStatus) {
-                        turnStatus.textContent = "❗ Please check in to activate your turn queue.";
+                        turnStatus.textContent = "Please check in to activate your turn queue.";
                         turnStatus.classList.remove("text-green-600", "font-semibold");
                     }
                 }
@@ -821,56 +895,50 @@ window.salespersons = @json($salesperson); // comes from controller
   
       const myId = document.getElementById('currentUserId')?.value;
       window.Echo.channel('sales-turn')
-    .listen('TurnAssigned', (e) => {
-        const myId = document.getElementById('currentUserId')?.value;
-        const btn = document.getElementById("takeCustomerBtn");
-        const turnStatus = document.getElementById("turn-status");
-        const isMyTurnSpan = document.getElementById("isMyTurnValue");
+.listen('TurnAssigned', async (e) => {
+    const currentUserId = document.getElementById("currentUserId")?.value;
+    const takeCustomerBtn = document.getElementById("takeCustomerBtn");
+    const turnStatus = document.getElementById("turn-status");
+    const isMyTurnSpan = document.getElementById("isMyTurnValue");
 
-        if (e.salesperson_id == myId) {
-          updateTurnStatusUI(e.salesperson_id == myId);
-Swal.fire({
-    icon: e.salesperson_id == myId ? 'info' : 'warning',
-    title: e.salesperson_id == myId ? '🎯 Your Turn!' : '🔒 Not Your Turn!',
-    text: e.salesperson_id == myId ? 'You can now take the next customer.' : 'Please wait your turn.'
-});
+    const isMyTurn = e.salesperson_id == currentUserId;
+    window.isMyTurn = isMyTurn;
 
-            // ✅ Update button
-            btn?.removeAttribute("disabled");
-            btn?.classList.remove("opacity-50", "cursor-not-allowed");
+    if (isMyTurn) {
+        // ✅ Speak the name before enabling
+        await announceTurn(e.salesperson_name);
 
-            // ✅ Update turn status message
-            if (turnStatus) {
-                turnStatus.textContent = "🎯 It's your turn!";
-                turnStatus.classList.add("text-grey-600", "font-semibold");
-            }
+        // ✅ Enable the take customer button
+        takeCustomerBtn?.removeAttribute("disabled");
+        takeCustomerBtn?.classList.remove("opacity-50", "cursor-not-allowed");
 
-            // ✅ Update "Is It Your Turn?" text
-            if (isMyTurnSpan) {
-                isMyTurnSpan.textContent = "true";
-                isMyTurnSpan.style.color = "grey";
-            }
+        // ✅ Update UI
+        turnStatus.textContent = "🎯 It's your turn!";
+        turnStatus.classList.add("text-grey-600", "font-semibold");
 
-            // ✅ Set a JS flag for consistency
-            window.isMyTurn = true;
-        } else {
-            // ❌ Disable button if not your turn
-            btn?.setAttribute("disabled", "true");
-            btn?.classList.add("opacity-50", "cursor-not-allowed");
-
-            if (turnStatus) {
-                turnStatus.textContent = " Please check in to activate your turn queue!";
-                turnStatus.classList.remove("text-gey-600");
-            }
-
-            if (isMyTurnSpan) {
-                isMyTurnSpan.textContent = "false";
-                isMyTurnSpan.style.color = "red";
-            }
-
-            window.isMyTurn = false;
+        if (isMyTurnSpan) {
+            isMyTurnSpan.textContent = "true";
+            isMyTurnSpan.style.color = "grey";
         }
-    });
+
+    } else {
+        // ❌ Not your turn
+        takeCustomerBtn?.setAttribute("disabled", "true");
+        takeCustomerBtn?.classList.add("opacity-50", "cursor-not-allowed");
+
+        turnStatus.textContent = "⏳ Not your turn!";
+        turnStatus.classList.remove("text-grey-600");
+
+        if (isMyTurnSpan) {
+            isMyTurnSpan.textContent = "false";
+            isMyTurnSpan.style.color = "red";
+        }
+    }
+});
+document.addEventListener('click', () => {
+    window.speechSynthesis.getVoices();
+}, { once: true });
+
 
   });
   </script>
@@ -888,12 +956,12 @@ Swal.fire({
             if (isMyTurn) {
                 takeBtn.removeAttribute("disabled");
                 takeBtn.classList.remove("opacity-50", "cursor-not-allowed");
-                turnStatus.textContent = "🎯 It's your turn!";
+                turnStatus.textContent = " It's your turn!";
                 turnStatus.classList.add("text-grey-600", "font-semibold");
             } else {
                 takeBtn.setAttribute("disabled", "true");
                 takeBtn.classList.add("opacity-50", "cursor-not-allowed");
-                turnStatus.textContent = "⏳ Not your turn!";
+                turnStatus.textContent = "Not your turn!";
                 turnStatus.classList.remove("text-grey-600", "font-semibold");
             }
         }
@@ -920,57 +988,78 @@ Swal.fire({
         forceTLS: true
     });
 
-    // Listen for TurnAssigned event
     window.Echo.channel('sales-turn')
-        .listen('TurnAssigned', (e) => {
-            const isMyTurn = e.salesperson_id == currentUserId;
+.listen('TurnAssigned', async (e) => {
+    const currentUserId = document.getElementById("currentUserId")?.value;
+    const takeCustomerBtn = document.getElementById("takeCustomerBtn");
+    const turnStatus = document.getElementById("turn-status");
+    const isMyTurnSpan = document.getElementById("isMyTurnValue");
 
-            updateTurnStatusUI(isMyTurn);
-            fireTurnAlert(isMyTurn);
-        });
+    const isMyTurn = e.salesperson_id == currentUserId;
+    window.isMyTurn = isMyTurn;
 
-    function updateTurnStatusUI(isMyTurn) {
-        const takeBtn = document.getElementById("takeCustomerBtn");
-        const turnText = document.getElementById("turn-status");
-        const isMyTurnSpan = document.getElementById("isMyTurnValue");
+    if (isMyTurn) {
+        // ✅ Speak the name before enabling
+        await announceTurn(e.salesperson_name);
 
-        window.isMyTurn = isMyTurn; // Global variable
+        // ✅ Enable the take customer button
+        takeCustomerBtn?.removeAttribute("disabled");
+        takeCustomerBtn?.classList.remove("opacity-50", "cursor-not-allowed");
 
-        if (isMyTurn) {
-            takeBtn?.removeAttribute("disabled");
-            takeBtn?.classList.remove("opacity-50", "cursor-not-allowed");
+        // ✅ Update UI
+        turnStatus.textContent = "🎯 It's your turn!";
+        turnStatus.classList.add("text-grey-600", "font-semibold");
 
-            turnText.textContent = "🎯 It's your turn!";
-            turnText.classList.add("text-grey-600", "font-semibold");
+        if (isMyTurnSpan) {
+            isMyTurnSpan.textContent = "true";
+            isMyTurnSpan.style.color = "grey";
+        }
 
-            if (isMyTurnSpan) {
-                isMyTurnSpan.textContent = "true";
-                isMyTurnSpan.style.color = "grey";
-            }
-        } else {
-            takeBtn?.setAttribute("disabled", "true");
-            takeBtn?.classList.add("opacity-50", "cursor-not-allowed");
+    } else {
+        // ❌ Not your turn
+        takeCustomerBtn?.setAttribute("disabled", "true");
+        takeCustomerBtn?.classList.add("opacity-50", "cursor-not-allowed");
 
-            turnText.textContent = "⏳ Not your turn!";
-            turnText.classList.remove("text-grey-600");
+        turnStatus.textContent = "⏳ Not your turn!";
+        turnStatus.classList.remove("text-grey-600");
 
-            if (isMyTurnSpan) {
-                isMyTurnSpan.textContent = "false";
-                isMyTurnSpan.style.color = "red";
-            }
+        if (isMyTurnSpan) {
+            isMyTurnSpan.textContent = "false";
+            isMyTurnSpan.style.color = "red";
         }
     }
+});
+document.addEventListener('click', () => {
+    window.speechSynthesis.getVoices();
+}, { once: true });
+
 
     function fireTurnAlert(isMyTurn) {
         Swal.fire({
             icon: isMyTurn ? 'success' : 'info',
-            title: isMyTurn ? '🎯 Your Turn!' : '❗ Please check in to activate your turn queue.',
+            title: isMyTurn ? ' Your Turn!' : 'Please check in to activate your turn queue.',
             text: isMyTurn
                 ? 'You can now take the next customer.'
                 : 'Please fill the form.'
         });
     }
 });
+function announceTurn(name) {
+    return new Promise((resolve) => {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(`${name}, it's your turn`);
+        msg.lang = 'en-US';
+        msg.rate = 1;
+
+        msg.onend = () => resolve();  // When speech ends, resolve promise
+        window.speechSynthesis.speak(msg);
+    });
+}
+
+document.addEventListener('click', () => {
+    window.speechSynthesis.getVoices();
+}, { once: true });
+
 
 </script>
 <script>
@@ -1066,7 +1155,7 @@ Swal.fire({
 
     Swal.fire({
         icon: 'info',
-        title: '⏳ Not Your Turn',
+        title: 'Not Your Turn',
         text: errorMsg,
         confirmButtonText: 'OK',
         allowOutsideClick: false,
@@ -1135,5 +1224,85 @@ Swal.fire({
     });
   });
 </script>
-
+<script>
+  document.querySelectorAll('.customer-card').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      const name = card.getAttribute('data-name');
+      const email = card.getAttribute('data-email');
+      const phone = card.getAttribute('data-phone');
+      const interest = card.getAttribute('data-interest');
+      const notes = card.getAttribute('data-notes');
+      const disposition = card.getAttribute('data-disposition');
+      const process = JSON.parse(card.getAttribute('data-process') || '[]');
+  
+      document.getElementById('nameInput').value = name || '';
+      document.getElementById('emailInput').value = email || '';
+      document.getElementById('phone').value = phone || '';
+      document.getElementById('interestInput').value = interest || '';
+      document.querySelector('textarea[name="notes"]').value = notes || '';
+  
+      // Clear all checkboxes
+      document.querySelectorAll('input[name="process[]"]').forEach(cb => cb.checked = false);
+      // Check those in process
+      process.forEach(p => {
+        const checkbox = document.querySelector(`input[name="process[]"][value="${p}"]`);
+        if (checkbox) checkbox.checked = true;
+      });
+  
+      // Set disposition radio
+      if (disposition) {
+        const radio = document.querySelector(`input[name="disposition"][value="${disposition}"]`);
+        if (radio) radio.checked = true;
+      }
+    });
+  });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toBtn = document.getElementById('toBtn');
+    
+        toBtn?.addEventListener('click', function () {
+            const salesperson = this.getAttribute('data-salesperson');
+            const customer = this.getAttribute('data-customer');
+            const time = this.getAttribute('data-time');
+    
+            // Fill in check-in info
+            document.getElementById('checkin-salesperson').textContent = salesperson ?? '-';
+            document.getElementById('checkin-customer').textContent = customer ?? '-';
+            document.getElementById('checkin-time').textContent = time ?? '-';
+    
+            // Show the info section
+            document.getElementById('checkin-info').classList.remove('hidden');
+        });
+    });
+    </script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const toBtns = document.querySelectorAll('.toBtn');
+      const checkinInfo = document.getElementById('checkin-info');
+  
+      toBtns.forEach(btn => {
+          btn.addEventListener('click', function () {
+              const salesperson = this.dataset.salesperson;
+              const customer = this.dataset.customer;
+              const time = this.dataset.time;
+              const salespersonId = this.dataset.salespersonId;
+  
+              // Fill right-side panel
+              document.getElementById('checkin-salesperson').textContent = salesperson;
+              document.getElementById('checkin-customer').textContent = customer;
+              document.getElementById('checkin-time').textContent = time;
+              checkinInfo.classList.remove('hidden');
+  
+              // Hide all forms
+              document.querySelectorAll('.sales-form').forEach(form => form.classList.add('hidden'));
+  
+              // Show current salesperson's form
+              const currentForm = document.querySelector(`.sales-form[data-salesperson-id="${salespersonId}"]`);
+              if (currentForm) currentForm.classList.remove('hidden');
+          });
+      });
+  });
+  </script>
+      
 @endpush  

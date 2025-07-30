@@ -9,24 +9,34 @@ use App\Models\Appointment;
 use Illuminate\Support\Facades\Validator;
 class SalesAppointmentController extends Controller
 {
+    // use App\Models\SalesProfile;
+
     public function index()
     {
-        $salespersons = SalesProfile::all(); // Optional if needed
-        return view('salesperson.appointments.create', compact('salespersons'));
+        $salespersonId = session('sales_id');  // <- This is the session key you’re setting at login.
+    
+        $loggedInSalesperson = SalesProfile::find($salespersonId);
+    
+        return view('salesperson.appointments.create', compact('loggedInSalesperson'));
     }
+    
+    
 
     public function showList()
     {
-        $salespersonId = session('salesperson_id'); // or Auth::user()->sales_profile_id
+        $role = session('role');
+        $salespersonId = session('sales_id');
     
-        $appointments = \App\Models\Appointment::with('salesperson')
-            ->where('salesperson_id', $salespersonId)
-            ->latest()
-            ->get();
+        $query = \App\Models\Appointment::with('salesperson');
+    
+        if ($role === 'Sales Person') {
+            $query->where('salesperson_id', $salespersonId);
+        }
+    
+        $appointments = $query->latest()->get();
     
         return view('salesperson.appointments.index', compact('appointments'));
     }
-    
     
 
     public function show($id)
@@ -34,7 +44,7 @@ class SalesAppointmentController extends Controller
         $appointment = Appointment::findOrFail($id);
 
         // Only allow access to their own appointment
-        if ($appointment->salesperson_id != session('salesperson_id')) {
+        if ($appointment->salesperson_id != session('sales_id')) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -67,7 +77,7 @@ class SalesAppointmentController extends Controller
             }
     
             $validated = $validator->validated();
-            $validated['salesperson_id'] = session('salesperson_id') ?? 1; // fallback ID
+            $validated['salesperson_id'] = session('sales_id') ?? 1; // fallback ID
     
             Appointment::create($validated);
     
@@ -88,7 +98,7 @@ class SalesAppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
 
-        if ($appointment->salesperson_id != session('salesperson_id')) {
+        if ($appointment->salesperson_id != session('sales_id')) {
             abort(403, 'Unauthorized');
         }
 
@@ -98,19 +108,21 @@ class SalesAppointmentController extends Controller
     public function edit($id)
     {
         $appointment = Appointment::findOrFail($id);
-
-        if ($appointment->salesperson_id != session('salesperson_id')) {
+    
+        if ($appointment->salesperson_id != session('sales_id')) {
             abort(403, 'Unauthorized');
         }
-
-        return view('salesperson.appointments.edit', compact('appointment'));
+    
+        $loggedInSalesperson = \App\Models\SalesProfile::find(session('sales_id'));
+    
+        return view('salesperson.appointments.edit', compact('appointment', 'loggedInSalesperson'));
     }
-
+    
     public function update(Request $request, $id)
     {
         $appointment = Appointment::findOrFail($id);
 
-        if ($appointment->salesperson_id != session('salesperson_id')) {
+        if ($appointment->salesperson_id != session('sales_id')) {
             abort(403, 'Unauthorized');
         }
 

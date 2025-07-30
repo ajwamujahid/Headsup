@@ -14,9 +14,19 @@ use App\Jobs\AssignTurnJob;
 use App\Jobs\AssignCustomerJob;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-
+use App\Events\SalespersonHighlighted;
 class SalesPersonController extends Controller
 {
+
+    public function triggerHighlight(Request $request)
+    {
+        $customerId = $request->customer_id;
+        broadcast(new SalespersonHighlighted($customerId))->toOthers();
+        return response()->json(['status' => 'Event dispatched']);
+    }
+    
+
+
     public function assignCurrentTurn()
 {
     // Reset all to not current
@@ -100,16 +110,18 @@ public function dashboard()
 
     $checkedIn = $checkin !== null;
 
-    // Determine if it's their turn
+    // ✅ Determine if it's their turn
     $firstInLine = SalesCheckin::whereNull('check_out_time')
         ->orderBy('last_assigned_at')
         ->orderBy('check_in_time')
-        ->lockForUpdate()
         ->first();
 
     $isMyTurn = $firstInLine && $firstInLine->salesperson_id == $salespersonId;
 
-    // ✅ Pass $checkin to the view
+    // ✅ Get turn holder's name
+    $turnHolder = $firstInLine ? $firstInLine->salesperson : null;
+    $turnHolderName = optional($turnHolder)->name;
+
     return view('salesperson.dashboard', compact(
         'salesperson',
         'salespeople',
@@ -117,8 +129,8 @@ public function dashboard()
         'checkedIn',
         'isMyTurn',
         'allSalespeople',
-        
-        'checkin'  // <-- Add this line
+        'checkin',
+        'turnHolderName' // ✅ Add this
     ));
 }
 

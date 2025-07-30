@@ -34,6 +34,9 @@ box-shadow: none !important;
 </style>
 
 <div class="">
+    
+    
+
 <!-- Page Heading -->
 <div class="max-w-full mx-auto sm:px-6 lg:px-8">
 <div class="bg-white shadow rounded-lg p-6">
@@ -71,19 +74,23 @@ box-shadow: none !important;
         </div>
     </div>
 
-                            <!-- Section: Salesperson -->
-        <h3 class="text-lg font-semibold text-gray-700 mb-4">Salesperson</h3>
-        <div class="mb-8">
-            <label class="block text-sm font-medium text-gray-700">Select Salesperson</label>
-            <select name="salesperson_id"  class="select2 mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <option value=""> Select Salesperson</option>
-                @foreach($salespersons as $salesperson)
-                    <option value="{{ $salesperson->id }}">{{ $salesperson->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        
-
+                            {{-- <!-- Section: Salesperson --> --}}
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4">Salesperson</h3>
+                            <div class="mb-8">
+                                <label class="block text-sm font-medium text-gray-700">Select Salesperson</label>
+                            
+                                @if($loggedInSalesperson)
+                                    <select name="salesperson_id" class=" mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                        <option value="{{ $loggedInSalesperson->id }}">
+                                            {{ $loggedInSalesperson->name }}
+                                        </option>
+                                    </select>
+                                @else
+                                    <p class="text-red-500">No salesperson logged in.</p>
+                                @endif
+                            </div>
+                            
+                            
     <!-- Section: Notes -->
     <h3 class="text-lg font-semibold text-gray-700 mb-4">Additional Notes</h3>
     <div class="mb-8">

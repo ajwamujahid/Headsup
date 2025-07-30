@@ -71,23 +71,23 @@ background-color: #111827 !important;
                 class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
         </div>
     </div>
-
-    <!-- Salesperson -->
     <h3 class="text-lg font-semibold text-gray-700 mb-4">Salesperson</h3>
     <div class="mb-8">
         <label class="block text-sm font-medium text-gray-700">Select Salesperson</label>
-        <select name="salesperson_id" class="select2">
-            <option value="">Select salesperson</option>
-            @foreach ($salespersons as $person)
-                <option value="{{ $person->id }}" {{ $appointment->salesperson_id == $person->id ? 'selected' : '' }}>
-                    {{ $person->name }}
-                </option>
-            @endforeach
-        </select>
-        
-        
-    </div>
+    
+        @if($loggedInSalesperson)
+        <select disabled class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
 
+                <option value="{{ $loggedInSalesperson->id }}" selected>
+                    {{ $loggedInSalesperson->name }}
+                </option>
+            </select>
+            <input type="hidden" name="salesperson_id" value="{{ $loggedInSalesperson->id }}">
+        @else
+            <p class="text-red-500">No salesperson logged in.</p>
+        @endif
+    </div>
+    
 
 
     <!-- Notes -->
