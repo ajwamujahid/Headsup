@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -115,7 +114,8 @@
         </div>
         <div id="tokenList" class="scrollable">
             @foreach ($customers as $c)
-                <div id="queue-row-{{ $c->id }}" class="active-token-row cursor-pointer" data-customer-id="{{ $c->id }}">
+            <div id="queue-row-{{ $c->id }}" class="active-token-row cursor-pointer" data-customer-id="{{ $c->id }}" data-salesperson-id="{{ $c->salesperson->id ?? '' }}">
+
                     <div>{{ $c->salesperson->name ?? 'N/A' }}</div>
                     <div>{{ $c->name }}</div>
                     <div>
@@ -135,17 +135,23 @@
             <div>Name &amp; Time</div>
         </div>
         <div id="checkinList" class="scrollable">
-            @forelse($checkedInSalespeople as $checkin)
+            @php
+            $sortedCheckins = $checkedInSalespeople->sortBy('created_at');
+        @endphp
+        
+        @forelse($sortedCheckins as $checkin)
             <div class="checkin-row" data-salesperson-id="{{ $checkin->salesperson->id }}">
-              <div class="flex flex-col w-full overflow-hidden px-4">
-                  <strong>{{ $checkin->salesperson->name ?? 'N/A' }}</strong>
-                  <span class="text-xs text-muted-foreground">{{ $checkin->created_at->diffForHumans() }}</span>
-              </div>
-          </div>
-          
-            @empty
-                <div class="px-4 text-sm text-gray-500">No check-ins for today.</div>
-            @endforelse
+                <div class="flex flex-col w-full overflow-hidden px-4">
+                    <strong>{{ $checkin->salesperson->name ?? 'N/A' }}</strong>
+                    <span class="text-xs text-muted-foreground" title="{{ $checkin->created_at->format('Y-m-d h:i A') }}">
+                        {{ $checkin->created_at->format('Y-m-d h:i A') }}
+                    </span>
+                </div>
+            </div>
+        @empty
+            <div class="px-4 text-sm text-gray-500">No check-ins for today.</div>
+        @endforelse
+        
         </div>
     </section>
 </div>
@@ -197,24 +203,34 @@
 }, { once: true });
 
 function callTopSalesperson() {
-    const topRow = document.querySelector('#checkinList .checkin-row');
-    if (!topRow) return;
+    const checkinRows = document.querySelectorAll('#checkinList .checkin-row');
+    if (!checkinRows.length) return;
 
-    const salespersonName = topRow.querySelector('strong').innerText;
-    const salespersonId = topRow.dataset.salespersonId;
+    // Collect IDs of salespeople who already have assigned customers
+    const assignedSalespersonIds = Array.from(document.querySelectorAll('#tokenList .active-token-row'))
+        .map(row => row.getAttribute('data-salesperson-id'))
+        .filter(Boolean);
 
-   // alert('Calling Salesperson ID:', salespersonId);
-    //alert('Last Called ID:', sessionStorage.getItem('last_called_id'));
+    const availableRows = Array.from(checkinRows).filter(row => {
+        const sid = row.getAttribute('data-salesperson-id');
+        return !assignedSalespersonIds.includes(sid);
+    });
+
+    // Logic: if anyone available (not assigned customer yet), pick first
+    // Else, fallback to first check-in again
+    const nextRow = availableRows.length ? availableRows[0] : checkinRows[0];
+    const salespersonId = nextRow.getAttribute('data-salesperson-id');
+    const salespersonName = nextRow.querySelector('strong').innerText;
 
     if (sessionStorage.getItem('last_called_id') !== salespersonId) {
         sessionStorage.setItem('last_called_id', salespersonId);
-        console.log('Speaking:', salespersonName);
-        // speak(   `It's your turn, ${salespersonName}`);
         speak(`${salespersonName}, It's your turn`);
     } else {
-        console.log('Already called, skipping...');
+        console.log(`Already called: ${salespersonName}`);
     }
 }
+
+
 
   // Mutation Observer to detect when salesperson row is added
   const checkinList = document.getElementById('checkinList');

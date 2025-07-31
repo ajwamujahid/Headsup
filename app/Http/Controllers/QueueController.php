@@ -67,17 +67,25 @@ class QueueController extends Controller
     return response()->json(['status' => 'success']);
 }
 
+
 public function index()
 {
+    // Step 1: Get today's check-ins
     $todayCheckins = SalesCheckin::with('salesperson')
         ->whereDate('created_at', now()->toDateString())
         ->latest()
         ->get();
 
-    $checkedInSalespeople = $todayCheckins->unique('salesperson_id');
+    // Step 2: Filter only those who are still checked in (not checked out)
+    $checkedInSalespeople = $todayCheckins->whereNull('check_out_time');
 
+    // Step 3: Remove duplicate salespeople by salesperson_id
+    $checkedInSalespeople = $checkedInSalespeople->unique('salesperson_id');
+
+    // Step 4: Get list of currently checked-in salesperson IDs
     $assignedIds = $checkedInSalespeople->pluck('salesperson_id');
 
+    // Step 5: Get customers assigned to these salespeople or unassigned
     $customers = Customer::with('salesperson')
         ->where(function ($query) use ($assignedIds) {
             $query->whereIn('assigned_to', $assignedIds)
@@ -86,20 +94,19 @@ public function index()
         ->latest()
         ->get();
 
-    // Get Current Turn Salesperson
+    // Step 6: Get the currently active turn salesperson (if any)
     $currentTurn = SalesCheckin::with('salesperson')
-    ->where('is_current_turn', true)
-    ->whereNull('check_out_time')
-    ->first();
-
+        ->where('is_current_turn', true)
+        ->whereNull('check_out_time')
+        ->first();
 
     return view('queue-list', [
         'checkedInSalespeople' => $checkedInSalespeople,
         'customers' => $customers,
-        'currentTurn' => $currentTurn,   // <-- Add this line
+        'currentTurn' => $currentTurn,
     ]);
-
 }
+
 public function rotateTurn($forceSalespersonId = null)
 {
     // Clear current turn
@@ -124,6 +131,7 @@ public function rotateTurn($forceSalespersonId = null)
         event(new TurnAssigned(null, 'No Salesperson', 'N/A'));
     }
 }
+
 
     public function autoAssign(Request $request)
     {

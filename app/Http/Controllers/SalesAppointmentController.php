@@ -121,11 +121,11 @@ class SalesAppointmentController extends Controller
     public function update(Request $request, $id)
     {
         $appointment = Appointment::findOrFail($id);
-
+    
         if ($appointment->salesperson_id != session('sales_id')) {
             abort(403, 'Unauthorized');
         }
-
+    
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
@@ -133,13 +133,14 @@ class SalesAppointmentController extends Controller
             'time' => 'required',
             'status' => 'required|in:scheduled,completed,canceled',
         ]);
-
+    
         $appointment->update($validated);
-
+    
         return response()->json([
             'status' => 'success',
             'message' => 'Appointment updated successfully!',
-            'redirect' => route('salesperson.appointments.index'),
+            'redirect' => url('/salesperson/appointments'), // <-- Hardcoded target route
         ]);
     }
+    
 }

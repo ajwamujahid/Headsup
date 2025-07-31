@@ -98,14 +98,14 @@ $subtitle = 'Schedule a new appointment by filling out the form below.';
                                     <td class="border-b px-4 py-2">{{ $customer->name }}</td>
                                     <td class="border-b px-4 py-2">{{ $customer->created_at->format('d M Y h:i A') }}</td>
                                     <td class="border-b px-4 py-2">
-                                        <span class="inline-block px-2 py-1 text-xs font-semibold bg-green-100 text-white rounded mr-1 mb-1">
+                                        <span class="inline-block px-2 py-1  font-semibold bg-green-100 text-white rounded ">
                                         @php
                                             $process = is_array($customer->process) 
                                                 ? $customer->process 
                                                 : json_decode($customer->process, true);
                                         @endphp
                                         @if ($process)
-                                            <ul class="list-disc pl-4 text-sm text-gray-700">
+                                            <ul class="list-disc pl-4 py-1.5 px-2 text-gray-700">
                                                 @foreach ($process as $step)
                                                     <li>{{ $step }}</li>
                                                 @endforeach
@@ -117,7 +117,7 @@ $subtitle = 'Schedule a new appointment by filling out the form below.';
                                     </td>
                                     
                                     <td class="border-b px-4 py-2">
-                                        <span class="inline-block px-2 py-1 text-xs font-semibold bg-gray-800 text-white rounded mr-1 mb-1">{{ $customer->disposition ?? '-' }}
+                                        <span class="inline-block px-2 py-1.5 text-xs font-semibold bg-gray-800 text-white rounded mr-1 mb-1">{{ $customer->disposition ?? '-' }}
                                         </span>
                                         </td>
                                     <td class="border-b px-4 py-2">

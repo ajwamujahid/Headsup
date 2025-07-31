@@ -287,7 +287,12 @@ public function dashboard()
             ->first();
 
         if ($firstInLine && $firstInLine->salesperson_id == $event->salesperson->id) {
-            event(new TurnAssigned($event->salesperson->id));
+            event(new TurnAssigned(
+                $event->salesperson->id,
+                $event->salesperson->name,
+                $event->salesperson->email
+            ));
+            
         }
     }
     public function storeCustomer(Request $request)
@@ -325,8 +330,10 @@ public function dashboard()
         if (!$checkin) {
             return response()->json([
                 'success' => false,
-                'error' => 'You are not checked in.'
-            ], 403);
+                'error' => 'You are not checked in.',
+                'redirect' => url('/salesperson/dashboard'), 
+            ], 
+            403);
         }
     
         $firstInLine = SalesCheckin::whereNull('check_out_time')
@@ -336,9 +343,10 @@ public function dashboard()
     
         if (!$firstInLine || $firstInLine->salesperson_id !== $currentSalespersonId) {
             return response()->json([
-                'success' => false,
-                'error' => '⏳ Not your turn. Please wait until the current salesperson checks out.'
-            ], 403);
+                'success' => true,
+                'message' => 'Customer saved successfully.',
+                'redirect' => url('/salesperson/dashboard'), 
+            ]);
         }
     
         $customer = Customer::create([
@@ -364,14 +372,23 @@ public function dashboard()
             ->orderBy('last_assigned_at')
             ->orderBy('check_in_time')
             ->first();
-    
-        if ($next) {
-            event(new TurnAssigned($next->salesperson_id));
-        }
+            if ($next) {
+                $salesperson = SalesProfile::find($next->salesperson_id);
+            
+                if ($salesperson) {
+                    event(new TurnAssigned(
+                        $salesperson->id,
+                        $salesperson->name,
+                        $salesperson->email
+                    ));
+                }
+            }
+            
     
         return response()->json([
             'success' => true,
-            'message' => '🎉 Customer saved successfully.'
+            'message' => '🎉 Customer saved successfully.',
+            'redirect' => url('/salesperson/dashboard'), 
         ]);
     }
     

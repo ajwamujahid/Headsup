@@ -209,7 +209,7 @@
   <div class="bg-white rounded-xl shadow p-3 w-full max-w-md mx-auto space-y-4 border mb-4">
     <!-- Status + Button -->
     <div class="flex items-center justify-between">
-     <span class="status-text text-sm font-semibold px-3 py-1 rounded-md flex items-center gap-1 bg-red-100 text-red-700">
+     <span class="status-text text-sm font-semibold px-3 py-1.5 rounded-md flex items-center gap-2 bg-red-100 text-red-700">
 <!-- X Icon -->
 <svg class="w-4 h-4 text-red-700" fill="none" stroke="currentColor" stroke-width="2"
      viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -223,11 +223,10 @@ Checked Out
       @csrf
          <button type="submit"
           id="checkToggleButton" 
-          class="check-toggle-btn px-6 py-2 text-sm font-semibold flex items-center gap-2 rounded-md text-white shadow-md
-          bg-green-500 hover:bg-green-600">
+          class="check-toggle-btn px-4 py-1.5 text-sm mt-4 font-semibold flex items-center gap-2 rounded-md text-white 
+          bg-green-500">
           <span class="btn-text">Check In</span>
-          <svg class="btn-spinner hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
-            fill="none" viewBox="0 0 24 24">
+         
             <circle class="opacity-25" cx="12" cy="12" r="10"
               stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor"
@@ -495,11 +494,6 @@ window.salespersons = @json($salesperson); // comes from controller
       const turnStatus = document.getElementById("turn-status");
       const customerForm = document.getElementById("customerFormModal");
 
-      // Preload voices on user interaction
-      document.addEventListener('click', () => {
-          window.speechSynthesis.getVoices();
-      }, { once: true });
-
       if (isMyTurn) {
           turnStatus.textContent = "It's your turn!";
           turnStatus.classList.add("text-gray-600", "font-semibold");
@@ -515,31 +509,22 @@ window.salespersons = @json($salesperson); // comes from controller
           e.preventDefault();
 
           if (isMyTurn) {
-              // ✅ Speak salesperson name + it's your turn
-              const msg = new SpeechSynthesisUtterance(`${salespersonName}, it's your turn`);
-              msg.lang = 'en-US';
-              msg.rate = 1;
-
-              msg.onend = function () {
-                  // ✅ Show SweetAlert after speech finishes
-                  Swal.fire({
-                      title: 'Customer Assigned!',
-                      text: "You may now fill the customer form.",
-                      icon: 'success',
-                      confirmButtonColor: '#3085d6',
-                      confirmButtonText: 'OK'
-                  }).then((result) => {
-                      if (result.isConfirmed) {
-                          customerForm?.classList.remove("hidden");
-                          if (turnStatus) {
-                              turnStatus.textContent = "It's your turn!";
-                              turnStatus.classList.add("text-gray-600", "font-semibold");
-                          }
+              // ✅ Show SweetAlert directly (no speech)
+              Swal.fire({
+                  title: 'Customer Assigned!',
+                  text: "You may now fill the customer form.",
+                  icon: 'success',
+                  confirmButtonColor: '#3085d6',
+                  confirmButtonText: 'OK'
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      customerForm?.classList.remove("hidden");
+                      if (turnStatus) {
+                          turnStatus.textContent = "It's your turn!";
+                          turnStatus.classList.add("text-gray-600", "font-semibold");
                       }
-                  });
-              };
-
-              speechSynthesis.speak(msg);
+                  }
+              });
 
           } else {
               Swal.fire({
@@ -782,7 +767,7 @@ window.salespersons = @json($salesperson); // comes from controller
 
             Swal.fire({
                 icon: 'success',
-                title: '✅ Checked In!',
+                title: 'Checked In!',
                 html: `<p><strong>Salesperson:</strong> ${res.salesperson}</p><p><strong>Check-In Time:</strong> ${res.check_in_time}</p>`
             });
 
@@ -1100,7 +1085,7 @@ document.addEventListener('click', () => {
     const modalSaveBtn = document.getElementById('modalSaveBtn');
 
     modalSaveBtn.addEventListener('click', function (e) {
-      e.preventDefault(); // Stop default form submission
+      e.preventDefault();
 
       modalSaveBtn.disabled = true;
       modalSaveBtn.textContent = 'Saving...';
@@ -1109,68 +1094,77 @@ document.addEventListener('click', () => {
 
       axios.post(form.action, formData)
         .then(function (response) {
-          if (response.data.success) {
+          const data = response.data;
+
+          if (data.success) {
             Swal.fire({
               icon: 'success',
               title: '✅ Customer Saved',
-              text: response.data.message || 'Customer saved successfully!',
-              confirmButtonText: 'OK',
+              text: data.message || 'Customer saved successfully!',
+              confirmButtonText: 'Go to Dashboard',
               allowOutsideClick: false,
               allowEscapeKey: false,
               backdrop: true
             }).then(() => {
-              // 🟢 Close Bootstrap modal (if exists)
-              const modalEl = document.getElementById('salesModal');
-              if (modalEl) {
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
+              if (data.redirect) {
+                window.location.href = data.redirect;
               }
-
-              modalSaveBtn.disabled = false;
-              modalSaveBtn.textContent = 'Save';
-              form.reset(); // Optional: reset form
             });
+
+            // Close modal & reset form
+            const modalEl = document.getElementById('salesModal');
+            if (modalEl) {
+              const modal = bootstrap.Modal.getInstance(modalEl);
+              if (modal) modal.hide();
+            }
+            form.reset();
+
           } else {
+            // ❌ Not your turn or other controlled backend rejection
             Swal.fire({
-              icon: 'info',
-              title: '⚠️ Hold On',
-              text: response.data.error || 'Please wait for your turn.',
+              icon: 'warning',
+              title: '⚠️ Action Blocked',
+              text: data.error || 'Something went wrong.',
               confirmButtonText: 'OK',
               allowOutsideClick: false,
               allowEscapeKey: false,
               backdrop: true
             }).then(() => {
-              modalSaveBtn.disabled = false;
-              modalSaveBtn.textContent = 'Save';
+              if (data.redirect) {
+                window.location.href = data.redirect;
+              }
             });
           }
         })
         .catch(function (error) {
-    console.error('Submission Error:', error);
+          console.error('Error submitting:', error);
 
-    const errorMsg =
-        error.response?.data?.error ||
-        error.message ||
-        'Please wait until it is your turn.';
+          const errData = error.response?.data || {};
+          const errMsg = errData.error || error.message || '⏳ Please wait until it is your turn.';
+          const redirectUrl = errData.redirect;
 
-    Swal.fire({
-        icon: 'info',
-        title: 'Not Your Turn',
-        text: errorMsg,
-        confirmButtonText: 'OK',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        backdrop: true
-    }).then(() => {
-        modalSaveBtn.disabled = false;
-        modalSaveBtn.textContent = 'Save';
-    });
-});
-
-
+          Swal.fire({
+            icon: 'error',
+            title: '⛔ Request Failed',
+            text: errMsg,
+            confirmButtonText: 'OK',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            backdrop: true
+          }).then(() => {
+            if (redirectUrl) {
+              window.location.href = redirectUrl;
+            }
+          });
+        })
+        .finally(() => {
+          modalSaveBtn.disabled = false;
+          modalSaveBtn.textContent = 'Save';
+        });
     });
   });
 </script>
+
 <script>
   document.querySelectorAll('.customer-card').forEach(card => {
     card.addEventListener('mouseenter', () => {
