@@ -1,4 +1,4 @@
-@extends('layouts.appointment')
+@extends('layouts.saledashboard')
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/css/intlTelInput.css" />
    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -32,7 +32,7 @@ background-color: #111827 !important;
 <div class="max-w-full mx-auto sm:px-6 lg:px-8">
 <div class="bg-white shadow rounded-lg p-6">
 
-    <form method="POST" action="{{ route('appointments.update', $appointment->id) }}" id="updateForm">
+    <form method="POST" action="{{ route('salesperson.appointments.update', $appointment->id) }}" id="updateForm">
 
 @csrf
 @method('PUT')
@@ -105,7 +105,7 @@ background-color: #111827 !important;
         <select name="status" class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             <option value="scheduled" {{ $appointment->status == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
             <option value="completed" {{ $appointment->status == 'completed' ? 'selected' : '' }}>Completed</option>
-            <option value="canceled" {{ $appointment->status == 'canceled' ? 'selected' : '' }}>Canceled</option>
+            <option value="canceled" {{ $appointment->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
         </select>
     </div>
 
@@ -124,60 +124,6 @@ background-color: #111827 !important;
 
     
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-document.getElementById('updateForm').addEventListener('submit', function (e) {
-e.preventDefault(); // Prevent normal form submit
-
-const form = e.target;
-const formData = new FormData(form);
-const actionUrl = form.action;
-fetch(actionUrl, {
-  method: 'POST',
-  headers: {
-    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-    'Accept': 'application/json',
-  },
-  body: formData,
-})
-.then(async response => {
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText); // This will go to .catch()
-  }
-
-  return response.json();
-})
-.then(data => {
-  if (data.status === 'success') {
-    Swal.fire({
-      icon: 'success',
-      title: 'Updated!',
-      text: data.message,
-      confirmButtonColor: '#111827',
-    }).then(() => {
-      window.location.href = data.redirect;
-    });
-  } else {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error!',
-      text: data.message || 'Something went wrong!',
-    });
-  }
-})
-.catch(error => {
-  console.error("Error occurred:", error);
-  Swal.fire({
-    icon: 'error',
-    title: 'Validation Error',
-    text: 'Please check your input and try again. See console for details.',
-  });
-});
-
-});
-</script>
             </div>
         </div>
     </main>
@@ -200,120 +146,64 @@ fetch(actionUrl, {
 
 @push('scripts')
 <!-- Additional Scripts -->
-        <script>
-// Initialize notification listener
-document.addEventListener('DOMContentLoaded', function() {
-// Only initialize for authenticated users
-                try {
-    // Initialize sound system first to ensure it's ready
-    if (window.VehicleImportNotification && typeof window.VehicleImportNotification.initAudio === 'function') {
-        console.log('Attempting to initialize audio context');
-    }
-    
-    // Show sound initialization button immediately for better UX
-    const soundInitContainer = document.getElementById('sound-init-container');
-    if (soundInitContainer) {
-        soundInitContainer.style.display = 'flex';
-    }
-    
-    // Initialize notification listener
-    if (window.NotificationListener) {
-        console.log('Initializing NotificationListener');
-        const listener = new NotificationListener(1);
-        
-        // Store the listener instance globally for debugging
-        window.notificationListenerInstance = listener;
-    } else {
-        console.warn('NotificationListener is not available on the window object');
-    }
-} catch (error) {
-    console.error('Error initializing NotificationListener:', error);
-}
 
-// Toggle notifications dropdown
-const notificationsButton = document.getElementById('notifications-menu-button');
-const notificationsDropdown = document.getElementById('notifications-dropdown');
-if (notificationsButton && notificationsDropdown) {
-    notificationsButton.addEventListener('click', () => {
-        notificationsDropdown.classList.toggle('hidden');
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.getElementById('updateForm').addEventListener('submit', function (e) {
+e.preventDefault(); // Prevent normal form submit
+
+const form = e.target;
+const formData = new FormData(form);
+formData.append('_method', 'PUT');  // <-- Force method override for Laravel
+
+const actionUrl = form.action;
+fetch(actionUrl, {
+  method: 'POST', // Keep POST (FormData limitation), Laravel will interpret as PUT
+  headers: {
+    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+    'Accept': 'application/json',
+  },
+  body: formData,
+})
+.then(async response => {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText); 
+  }
+  return response.json();
+})
+.then(data => {
+  if (data.status === 'success') {
+    Swal.fire({
+      icon: 'success',
+      title: 'Updated!',
+      text: data.message,
+      confirmButtonColor: '#111827',
+    }).then(() => {
+      window.location.href = data.redirect;
     });
-}
-
-// Toggle user dropdown
-const userButton = document.getElementById('user-menu-button');
-const userDropdown = document.getElementById('user-dropdown');
-if (userButton && userDropdown) {
-    userButton.addEventListener('click', () => {
-        userDropdown.classList.toggle('hidden');
+  } else {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error!',
+      text: data.message || 'Something went wrong!',
     });
-}
+  }
+})
+.catch(async error => {
+  const errorText = await error.message || await error.text?.();
+  console.error("Error occurred:", errorText);
 
-// Initialize sound buttons
-const soundInitContainer = document.getElementById('sound-init-container');
-const initSoundBtn = document.getElementById('init-sound-btn');
-const testSoundBtn = document.getElementById('test-sound-btn');
-
-// Initialize sound on click
-if (initSoundBtn) {
-    initSoundBtn.addEventListener('click', function() {
-        // Try to initialize audio context
-        if (window.VehicleImportNotification && window.VehicleImportNotification.initAudio) {
-            window.VehicleImportNotification.initAudio();
-        }
-        
-        // Test the sound
-        if (window.testVehicleNotificationSound) {
-            window.testVehicleNotificationSound();
-            
-            // Don't hide button to allow multiple initializations if needed
-            // soundInitContainer.style.display = 'none';
-            
-            // Add data attribute to track that it was initialized
-            initSoundBtn.setAttribute('data-initialized', 'true');
-            
-            // Change color to indicate it's been initialized
-            initSoundBtn.classList.remove('bg-primary');
-            initSoundBtn.classList.add('bg-green-500');
-        }
-    });
-}
-
-// Test sound button for admins
-if (testSoundBtn) {
-    testSoundBtn.addEventListener('click', function() {
-        if (window.testVehicleNotificationSound) {
-            window.testVehicleNotificationSound();
-        }
-    });
-}
-
-// Pre-load notification sound on any user interaction
-const preloadSound = function() {
-    if (window.VehicleImportNotification && window.VehicleImportNotification.initAudio) {
-        window.VehicleImportNotification.initAudio();
-        console.log('Audio context initialized via user interaction');
-    }
-    
-    // Remove this event listener after first user interaction
-    document.removeEventListener('click', preloadSound);
-    document.removeEventListener('touchstart', preloadSound);
-};
-
-// Add event listeners for first user interaction
-document.addEventListener('click', preloadSound);
-document.addEventListener('touchstart', preloadSound);
-
-// Close dropdowns when clicking outside
-document.addEventListener('click', (event) => {
-    if (!notificationsButton?.contains(event.target)) {
-        notificationsDropdown?.classList.add('hidden');
-    }
-    if (!userButton?.contains(event.target)) {
-        userDropdown?.classList.add('hidden');
-    }
+  Swal.fire({
+    icon: 'error',
+    title: 'Server Error!',
+    html: '<pre style="text-align:left;">' + errorText + '</pre>',
+  });
 });
 });
 </script>
+        
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 

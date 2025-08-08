@@ -110,6 +110,7 @@ Route::prefix('salesperson')->name('salesperson.')->group(function () {
     Route::get('/appointments/{id}', [SalesAppointmentController::class, 'show'])->name('appointments.show');
     Route::get('/appointments/{id}/arrival', [SalesAppointmentController::class, 'showArrivalForm'])->name('appointments.arrival');
     Route::get('/appointments/{id}/edit', [SalesAppointmentController::class, 'edit'])->name('appointments.edit');
+    
     Route::put('/appointments/{id}', [SalesAppointmentController::class, 'update'])->name('appointments.update');
 
 });

@@ -41,18 +41,24 @@ $subtitle = 'Manage and View all the appointmeents here';
                 <td class="px-4 py-2">
                     {{ \Carbon\Carbon::parse($appointment->created_at)->timezone('Asia/Karachi')->format('d M Y h:i A') }}
                 </td>
-                <td class="px-4 py-2">{{ $appointment->status }}</td>
+                <td class="px-4 py-2">
+                    <span class="inline-block px-3 py-1.5 text-sm font-semibold rounded-full
+                        {{ $appointment->status === 'cancelled' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-800' }}">
+                        {{ ucfirst($appointment->status) }}
+                    </span>
+                </td>
+                
 
                 <td class="px-4 py-2">
     @if($appointment->status === 'scheduled')
-        <a href="{{ route('salesperson.appointments.show', $appointment->id) }}" class="bg-gray-800 text-white px-3 py-1 rounded">View</a>
-        <a href="{{ route('salesperson.appointments.edit', $appointment->id) }}" class="bg-gray-800 text-white  px-3 py-1 rounded">Edit</a>
-        <a href="{{ route('salesperson.appointments.arrival', $appointment->id) }}"  class="bg-gray-800 text-white  px-3 py-1 rounded" >
+        <a href="{{ route('salesperson.appointments.show', $appointment->id) }}" class="bg-gray-800 text-white px-3 py-1.5 rounded">View</a>
+        <a href="{{ route('salesperson.appointments.edit', $appointment->id) }}" class="bg-gray-800 text-white  px-3 py-1.5 rounded">Edit</a>
+        <a href="{{ route('salesperson.appointments.arrival', $appointment->id) }}"  class="bg-gray-800 text-white  px-3 py-1.5 rounded" >
             Customer Arrived
         </a>
         
     @elseif($appointment->status === 'completed')
-        <a href="{{ route('appointments.show', $appointment->id) }}" class="bg-gray-800 text-white  px-3 py-1 rounded">View</a>
+        <a href="{{ route('appointments.show', $appointment->id) }}" class="bg-gray-800 text-white  px-3 py-1.5 rounded">View</a>
 
     @elseif($appointment->status === 'cancelled')
         {{-- No buttons --}}
